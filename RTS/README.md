@@ -11,8 +11,13 @@ This solution is designed to solve the common problem of contact details on Link
 ## Workflow Diagram
 
 The complete n8n workflow is visualized in the flowchart below.
+## Problem definition
 
 ![n8n Workflow Diagram](./RTS-workflow.png)
+
+## n8n workflow
+
+![n8n Workflow Diagram](./RTS-n8n-workflow.png)
 
 ## How It Works
 
