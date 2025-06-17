@@ -1,0 +1,519 @@
+[INFO] Read 15 rows from result.csv.
+[INFO] Read 11 data rows from RTS-TEST-DATA - Sheet1.csv.
+[INFO] Entering main processing loop.
+[DEBUG] All linkedin_url values from master sheet:
+https://www.linkedin.com/in/hpsc24/
+https://www.linkedin.com/in/svanweelden/
+https://www.linkedin.com/in/lancehackney/
+https://www.linkedin.com/in/pauliusztin/
+https://www.linkedin.com/in/aditya26/
+https://www.linkedin.com/in/nityan/
+https://www.linkedin.com/in/alex-dimakis-b1b20320/
+https://www.linkedin.com/in/gang-liu-3879a0248/
+https://www.linkedin.com/in/shirin-khosravi-jam/
+https://www.linkedin.com/in/karan-khanuja-315733146/
+https://www.linkedin.com/in/vsadhwani/
+[DEBUG] All normalized profile keys from result.csv:
+https://linkedin.com/in/hpsc24
+https://linkedin.com/in/svanweelden
+https://linkedin.com/in/lancehackney
+https://linkedin.com/in/pauliusztin
+https://linkedin.com/in/aditya26
+https://linkedin.com/in/nityan
+https://linkedin.com/in/alex-dimakis-b1b20320
+https://linkedin.com/in/gang-liu-3879a0248
+https://linkedin.com/in/shirin-khosravi-jam
+https://linkedin.com/in/karan-khanuja-315733146
+
+[DEBUG] Profile text for https://www.linkedin.com/in/hpsc24/:
+2028 DNC POTUS candidate since 6/1/18:
+1) End genocide globally 
+2) Pardon 100k protestors 
+3) Nuremberg type trials
+4) Zero donations over $28
+5) Crush fascism
+My professional focus has been intensely directed towards significant cases such as Camp L, Talcum, Roundup, and the Maui fire. The latter, a personal tragedy, where I lost friends, has only strengthened my resolve. Relocating to Arizona has marked a new chapter in my mission to support and empower those affected by such devastating events.
+
+In addition to my advocacy in these areas, I also specialize in the provision of quality leads and transfers in the insurance and nursing sectors. My goal is to facilitate meaningful connections that aid recovery and bring about positive change.
+
+TORTS leader for Depo-Provera & PFAS
+---
+
+Prompt for https://www.linkedin.com/in/hpsc24/:
+
+You are an expert at extracting contact information from text.
+Given the following LinkedIn profile data, extract:
+- All email addresses (including obfuscated ones like 'name [at] domain dot com' or 'name(at)domain(dot)com')
+- All phone numbers (in any format)
+- Any other direct contact information (Telegram, WhatsApp, etc.)
+
+Respond ONLY with a JSON object, no markdown, no explanation, no code block. Use these keys: "email", "phone_number", "contact". If nothing is found, use empty strings.
+
+Example output:
+{"email": "john.doe@gmail.com", "phone_number": "+1-555-123-4567", "contact": "Telegram: @johndoe"}
+
+Profile Data:
+2028 DNC POTUS candidate since 6/1/18:
+1) End genocide globally 
+2) Pardon 100k protestors 
+3) Nuremberg type trials
+4) Zero donations over $28
+5) Crush fascism
+My professional focus has been intensely directed towards significant cases such as Camp L, Talcum, Roundup, and the Maui fire. The latter, a personal tragedy, where I lost friends, has only strengthened my resolve. Relocating to Arizona has marked a new chapter in my mission to support and empower those affected by such devastating events.
+
+In addition to my advocacy in these areas, I also specialize in the provision of quality leads and transfers in the insurance and nursing sectors. My goal is to facilitate meaningful connections that aid recovery and bring about positive change.
+
+TORTS leader for Depo-Provera & PFAS
+
+---
+Response for https://www.linkedin.com/in/hpsc24/:
+{"email": "", "phone_number": "", "contact": ""}
+---
+
+[DEBUG] Profile text for https://www.linkedin.com/in/svanweelden/:
+Hey there, I'm Shaun! I love being the bridge between engineers and everyone else and thrive in environments where soft skills are just as important as technical skills. I'm am an extreme power-user of products and I love to nerd out with APIs, Computer Vision, Salesforce, and all sorts of data.
+
+Getting to use both my soft skills and technical skills on a regular basis is important to me. I genuinely enjoy managing and building teams and working with people from all backgrounds and experiences. Leveraging my technical experiences to improve processes and empower others is what gets me up in the morning.
+
+I graduated from Iowa State University in 2016, where I received my B.S. in Software Engineering. During my academic career, I was able to do a full-time internship at 6 different amazing companies including Twilio, Microsoft, Amazon, Boeing, the MathWorks, and Union Pacific. During these internships, I gained great insight into what software engineering is all about and was able to pick up best practices from a wide variety of work environments. 
+
+LET'S CONNECT
+Feel free to send me an email any time, shauntvanweelden [AT] gmail [DOT] com
+Scaled from $1M to $100M in annual revenue run rate in my first 11 months working with the team.
+
+I've had fun helping shape Mercor's strategy, go-to-market, compliance, and, most recently, Talent Success efforts, something near and dear to my heart.
+
+My strategy is shaped by empathy, transparency, and vulnerability to our co-workers, our clients, and our talent.
+Managing Director at Mercor (ex-OpenAI, ex-Scale AI)
+---
+
+Prompt for https://www.linkedin.com/in/svanweelden/:
+
+You are an expert at extracting contact information from text.
+Given the following LinkedIn profile data, extract:
+- All email addresses (including obfuscated ones like 'name [at] domain dot com' or 'name(at)domain(dot)com')
+- All phone numbers (in any format)
+- Any other direct contact information (Telegram, WhatsApp, etc.)
+
+Respond ONLY with a JSON object, no markdown, no explanation, no code block. Use these keys: "email", "phone_number", "contact". If nothing is found, use empty strings.
+
+Example output:
+{"email": "john.doe@gmail.com", "phone_number": "+1-555-123-4567", "contact": "Telegram: @johndoe"}
+
+Profile Data:
+Hey there, I'm Shaun! I love being the bridge between engineers and everyone else and thrive in environments where soft skills are just as important as technical skills. I'm am an extreme power-user of products and I love to nerd out with APIs, Computer Vision, Salesforce, and all sorts of data.
+
+Getting to use both my soft skills and technical skills on a regular basis is important to me. I genuinely enjoy managing and building teams and working with people from all backgrounds and experiences. Leveraging my technical experiences to improve processes and empower others is what gets me up in the morning.
+
+I graduated from Iowa State University in 2016, where I received my B.S. in Software Engineering. During my academic career, I was able to do a full-time internship at 6 different amazing companies including Twilio, Microsoft, Amazon, Boeing, the MathWorks, and Union Pacific. During these internships, I gained great insight into what software engineering is all about and was able to pick up best practices from a wide variety of work environments. 
+
+LET'S CONNECT
+Feel free to send me an email any time, shauntvanweelden [AT] gmail [DOT] com
+Scaled from $1M to $100M in annual revenue run rate in my first 11 months working with the team.
+
+I've had fun helping shape Mercor's strategy, go-to-market, compliance, and, most recently, Talent Success efforts, something near and dear to my heart.
+
+My strategy is shaped by empathy, transparency, and vulnerability to our co-workers, our clients, and our talent.
+Managing Director at Mercor (ex-OpenAI, ex-Scale AI)
+
+---
+Response for https://www.linkedin.com/in/svanweelden/:
+{"email": "shauntvanweelden@gmail.com", "phone_number": "", "contact": ""}
+---
+
+[DEBUG] Profile text for https://www.linkedin.com/in/lancehackney/:
+
+Instant quoting & booking for reefer LTL.
+Co-Founder at FreshX | The Only Platform for Refrigerated LTL
+---
+
+Prompt for https://www.linkedin.com/in/lancehackney/:
+
+You are an expert at extracting contact information from text.
+Given the following LinkedIn profile data, extract:
+- All email addresses (including obfuscated ones like 'name [at] domain dot com' or 'name(at)domain(dot)com')
+- All phone numbers (in any format)
+- Any other direct contact information (Telegram, WhatsApp, etc.)
+
+Respond ONLY with a JSON object, no markdown, no explanation, no code block. Use these keys: "email", "phone_number", "contact". If nothing is found, use empty strings.
+
+Example output:
+{"email": "john.doe@gmail.com", "phone_number": "+1-555-123-4567", "contact": "Telegram: @johndoe"}
+
+Profile Data:
+
+Instant quoting & booking for reefer LTL.
+Co-Founder at FreshX | The Only Platform for Refrigerated LTL
+
+---
+Response for https://www.linkedin.com/in/lancehackney/:
+{"email": "", "phone_number": "", "contact": ""}
+---
+
+[DEBUG] Profile text for https://www.linkedin.com/in/pauliusztin/:
+I am a senior AI engineer and contractor with 8+ years of experience. I design and implement modular, scalable, and production-ready ML systems for startups worldwide.
+
+My central mission is to build an AI academy and data-intensive AI/ML products that serve the world.
+
+Since training my first neural network in 2017,  I have 2 passions that fuel my mission:
+
+→ Designing and implementing production AI/ML systems using software engineering and MLOps best practices.
+
+→ Teaching people about the process.
+
+.
+
+I currently develop vertical AI agent solutions for a US startup. In the past, I built AI, ML and MLOps products for Metaphysic, CoreAI, Everseen, and Continental.
+
+I am the Founder of Decoding ML, a channel for battle-tested content on learning how to design, code, and deploy production-grade AI systems.
+
+As a content creator, I co-authored the LLM Engineer’s Handbook, an Amazon bestseller and industry standard on LLM, RAG, and LLMOps solutions, which sold over 15k+ copies.
+
+.
+
+If you want to learn how to build end-to-end production-ready AI systems with software engineering and MLOps best practices, subscribe to my Substack:
+
+🔗 https://decodingml.substack.com
+
+.
+
+💬 If you need AI solutions for your business, let’s discuss!
+
+🌎 Only open to full remote positions as a contractor.
+
+.
+
+Contact:
+
+✉️ Email: p.b.iusztin@gmail.com
+
+💻 Decoding ML: https://decodingml.substack.com
+
+Senior AI Engineer • Founder @ Decoding ML ~ Building an army of AI agents and teaching you about the process.
+---
+
+Prompt for https://www.linkedin.com/in/pauliusztin/:
+
+You are an expert at extracting contact information from text.
+Given the following LinkedIn profile data, extract:
+- All email addresses (including obfuscated ones like 'name [at] domain dot com' or 'name(at)domain(dot)com')
+- All phone numbers (in any format)
+- Any other direct contact information (Telegram, WhatsApp, etc.)
+
+Respond ONLY with a JSON object, no markdown, no explanation, no code block. Use these keys: "email", "phone_number", "contact". If nothing is found, use empty strings.
+
+Example output:
+{"email": "john.doe@gmail.com", "phone_number": "+1-555-123-4567", "contact": "Telegram: @johndoe"}
+
+Profile Data:
+I am a senior AI engineer and contractor with 8+ years of experience. I design and implement modular, scalable, and production-ready ML systems for startups worldwide.
+
+My central mission is to build an AI academy and data-intensive AI/ML products that serve the world.
+
+Since training my first neural network in 2017,  I have 2 passions that fuel my mission:
+
+→ Designing and implementing production AI/ML systems using software engineering and MLOps best practices.
+
+→ Teaching people about the process.
+
+.
+
+I currently develop vertical AI agent solutions for a US startup. In the past, I built AI, ML and MLOps products for Metaphysic, CoreAI, Everseen, and Continental.
+
+I am the Founder of Decoding ML, a channel for battle-tested content on learning how to design, code, and deploy production-grade AI systems.
+
+As a content creator, I co-authored the LLM Engineer’s Handbook, an Amazon bestseller and industry standard on LLM, RAG, and LLMOps solutions, which sold over 15k+ copies.
+
+.
+
+If you want to learn how to build end-to-end production-ready AI systems with software engineering and MLOps best practices, subscribe to my Substack:
+
+🔗 https://decodingml.substack.com
+
+.
+
+💬 If you need AI solutions for your business, let’s discuss!
+
+🌎 Only open to full remote positions as a contractor.
+
+.
+
+Contact:
+
+✉️ Email: p.b.iusztin@gmail.com
+
+💻 Decoding ML: https://decodingml.substack.com
+
+Senior AI Engineer • Founder @ Decoding ML ~ Building an army of AI agents and teaching you about the process.
+
+---
+Response for https://www.linkedin.com/in/pauliusztin/:
+{"email": "p.b.iusztin@gmail.com", "phone_number": "", "contact": ""}
+---
+
+[DEBUG] Profile text for https://www.linkedin.com/in/aditya26/:
+Meet Aditya! He has been an autodidact for the most part in his life and he's willing to learn something new everyday. He has always been fascinated by the analytical geometry. In his childhood he used to wonder whether he can find an equation for life and predict things using an equation?
+
+I'm very happy that indeed I can find such equations using Machine Learning and Deeplearning
+I've worked with Multivariate Regression, logistic regression, classification, support vector machines, Naives algorithms, decision trees, principal component analysis, linear discriminant analysis, Deep Neural Networks, Convolutional neural networks, Autoencoders(compression), denoising autoencoders and VAE. I've a strong passion for machine learning, deep learning and building softwares. In software engineering, I love building Fullstack Websites and a budding Mobile app developer. My goal is to provide software solutions by integrating it with a lot of tech stacks that impacts the lives of billions of people around the world.
+
+Languages:
+C, C++, Java, JavaScript, Python.
+
+ML DL Frameworks :
+Scikit learn, pandas, numpy, Keras, seaborn, Matplotlib, Tensorflow..
+
+Fullstack:
+HTML, CSS, JavaScript, Nodejs.
+
+App Development:
+Android Studio(Beginner)
+Key Machine Learning Engineer in DART (Digital Animal Replacement Technology). 
+DART is focused on leveraging machine learning to replace animals in clinical testing, providing innovative solutions for more ethical and efficient research methods. DART eliminates the need for animal testing by using AI-driven simulations and in vitro platforms to predict safety concerns during R&D, clinical trials, and production phases.
+
+Responsibilities:
+- Primarily focused on computer vision.
+- Conduct experiments with various computer vision models and use various techniques like hyperparameter tuning for optimization & improve accuracy.
+- Manage annotations for data labeling and model training.
+- Explore cutting-edge models like MedSAM to stay updated with the latest trends.
+- Regularly read research papers to implement the latest innovations in machine learning.
+Machine Learning Engineer @ R&D - Quantiphi |
+GATE DA '24 Qualified | Check out DS ML & DSA series (Tamil) YT : Adi Explains | Leetcode (1000+ days consistent streak)
+---
+
+Prompt for https://www.linkedin.com/in/aditya26/:
+
+You are an expert at extracting contact information from text.
+Given the following LinkedIn profile data, extract:
+- All email addresses (including obfuscated ones like 'name [at] domain dot com' or 'name(at)domain(dot)com')
+- All phone numbers (in any format)
+- Any other direct contact information (Telegram, WhatsApp, etc.)
+
+Respond ONLY with a JSON object, no markdown, no explanation, no code block. Use these keys: "email", "phone_number", "contact". If nothing is found, use empty strings.
+
+Example output:
+{"email": "john.doe@gmail.com", "phone_number": "+1-555-123-4567", "contact": "Telegram: @johndoe"}
+
+Profile Data:
+Meet Aditya! He has been an autodidact for the most part in his life and he's willing to learn something new everyday. He has always been fascinated by the analytical geometry. In his childhood he used to wonder whether he can find an equation for life and predict things using an equation?
+
+I'm very happy that indeed I can find such equations using Machine Learning and Deeplearning
+I've worked with Multivariate Regression, logistic regression, classification, support vector machines, Naives algorithms, decision trees, principal component analysis, linear discriminant analysis, Deep Neural Networks, Convolutional neural networks, Autoencoders(compression), denoising autoencoders and VAE. I've a strong passion for machine learning, deep learning and building softwares. In software engineering, I love building Fullstack Websites and a budding Mobile app developer. My goal is to provide software solutions by integrating it with a lot of tech stacks that impacts the lives of billions of people around the world.
+
+Languages:
+C, C++, Java, JavaScript, Python.
+
+ML DL Frameworks :
+Scikit learn, pandas, numpy, Keras, seaborn, Matplotlib, Tensorflow..
+
+Fullstack:
+HTML, CSS, JavaScript, Nodejs.
+
+App Development:
+Android Studio(Beginner)
+Key Machine Learning Engineer in DART (Digital Animal Replacement Technology). 
+DART is focused on leveraging machine learning to replace animals in clinical testing, providing innovative solutions for more ethical and efficient research methods. DART eliminates the need for animal testing by using AI-driven simulations and in vitro platforms to predict safety concerns during R&D, clinical trials, and production phases.
+
+Responsibilities:
+- Primarily focused on computer vision.
+- Conduct experiments with various computer vision models and use various techniques like hyperparameter tuning for optimization & improve accuracy.
+- Manage annotations for data labeling and model training.
+- Explore cutting-edge models like MedSAM to stay updated with the latest trends.
+- Regularly read research papers to implement the latest innovations in machine learning.
+Machine Learning Engineer @ R&D - Quantiphi |
+GATE DA '24 Qualified | Check out DS ML & DSA series (Tamil) YT : Adi Explains | Leetcode (1000+ days consistent streak)
+
+---
+Response for https://www.linkedin.com/in/aditya26/:
+{"email": "", "phone_number": "", "contact": ""}
+---
+
+[DEBUG] Profile text for https://www.linkedin.com/in/nityan/:
+I'm a PhD and polyglot with 25+ years of industry, startup, and academic experience in software and systems engineering. I am also a frequent public speaker and illustrator whose visual guides and sketchnotes have been used in technical documentation, marketing campaigns, conferences and curricula, to make complex concepts more accessible to broad audiences and visual learners.
+
+My early career was research-driven with a focus on distributed systems, reliability engineering and ubiquitous computing. I co-authored 30+ publications and 10+ patents in areas like context-aware frameworks, mobile computing and multi-screen advertising. I managed research teams and led multi-disciplinary projects and oversaw signature university collaborations with faculty at University of Michigan, Georgia Tech, UIUC, UIC, Northwestern and CMU - in areas ranging from distributed file systems, virtualization tooling, pervasive computing, and context-aware systems.
+
+As a remote worker, I discovered the power of local and virtual communities as a way of staying connected to the rapid pace of technology innovation and its impact on real-world economies. It led me to a passion for community building, consulting, and entrepreneurship. I have over a decade of experience building successful tech communities in the Greater New York area, helping skill thousands of developers by organizing meetups and developer conferences, and delivering online courses and workshops. 
+
+I pivoted to consulting to support local businesses and startups, expanding my research roots with new software development and startup engineering roles and responsibilities. I helped early-stage startups define strategy, build prototypes and secure funding and worked with local engineering colleges (as adjunct faculty and industry advisor) to add mobile & cloud skills to their curricula. I also established community programs and workshops to help members of under-represented communities gain soft skills in public speaking, visual storytelling, and proposal writing.
+
+My passion for education and community led to my current role in AI & Advocacy at Microsoft. I am "developer 0" for our products, providing early feedback to improve developer experience. I build and lead core efforts around content and sample creation that transform product awareness into productive adoption. I'm a visual storyteller whose illustrated guides have been featured in leadership posts, technical documentation and curriculum. And I'm a creative problem solver and innovator interested in reimagining education and productivity in the era of AI.
+Working on content, code and tools to help our developer ecosystem build intelligent apps and experiences with AI on Azure.
+AI · Engineer · Educator · Illustrator · Researcher
+---
+
+Prompt for https://www.linkedin.com/in/nityan/:
+
+You are an expert at extracting contact information from text.
+Given the following LinkedIn profile data, extract:
+- All email addresses (including obfuscated ones like 'name [at] domain dot com' or 'name(at)domain(dot)com')
+- All phone numbers (in any format)
+- Any other direct contact information (Telegram, WhatsApp, etc.)
+
+Respond ONLY with a JSON object, no markdown, no explanation, no code block. Use these keys: "email", "phone_number", "contact". If nothing is found, use empty strings.
+
+Example output:
+{"email": "john.doe@gmail.com", "phone_number": "+1-555-123-4567", "contact": "Telegram: @johndoe"}
+
+Profile Data:
+I'm a PhD and polyglot with 25+ years of industry, startup, and academic experience in software and systems engineering. I am also a frequent public speaker and illustrator whose visual guides and sketchnotes have been used in technical documentation, marketing campaigns, conferences and curricula, to make complex concepts more accessible to broad audiences and visual learners.
+
+My early career was research-driven with a focus on distributed systems, reliability engineering and ubiquitous computing. I co-authored 30+ publications and 10+ patents in areas like context-aware frameworks, mobile computing and multi-screen advertising. I managed research teams and led multi-disciplinary projects and oversaw signature university collaborations with faculty at University of Michigan, Georgia Tech, UIUC, UIC, Northwestern and CMU - in areas ranging from distributed file systems, virtualization tooling, pervasive computing, and context-aware systems.
+
+As a remote worker, I discovered the power of local and virtual communities as a way of staying connected to the rapid pace of technology innovation and its impact on real-world economies. It led me to a passion for community building, consulting, and entrepreneurship. I have over a decade of experience building successful tech communities in the Greater New York area, helping skill thousands of developers by organizing meetups and developer conferences, and delivering online courses and workshops. 
+
+I pivoted to consulting to support local businesses and startups, expanding my research roots with new software development and startup engineering roles and responsibilities. I helped early-stage startups define strategy, build prototypes and secure funding and worked with local engineering colleges (as adjunct faculty and industry advisor) to add mobile & cloud skills to their curricula. I also established community programs and workshops to help members of under-represented communities gain soft skills in public speaking, visual storytelling, and proposal writing.
+
+My passion for education and community led to my current role in AI & Advocacy at Microsoft. I am "developer 0" for our products, providing early feedback to improve developer experience. I build and lead core efforts around content and sample creation that transform product awareness into productive adoption. I'm a visual storyteller whose illustrated guides have been featured in leadership posts, technical documentation and curriculum. And I'm a creative problem solver and innovator interested in reimagining education and productivity in the era of AI.
+Working on content, code and tools to help our developer ecosystem build intelligent apps and experiences with AI on Azure.
+AI · Engineer · Educator · Illustrator · Researcher
+
+---
+Response for https://www.linkedin.com/in/nityan/:
+{"email": "", "phone_number": "", "contact": ""}
+---
+
+[DEBUG] Profile text for https://www.linkedin.com/in/alex-dimakis-b1b20320/:
+UC Berkeley Professor. Researcher in generative AI and Information Theory.
+Cofounder of Bespoke Labs 
+
+Professor, University of California Berkeley. 
+Co-Founder, Bespoke Labs: Data curation for post-training.
+---
+
+Prompt for https://www.linkedin.com/in/alex-dimakis-b1b20320/:
+
+You are an expert at extracting contact information from text.
+Given the following LinkedIn profile data, extract:
+- All email addresses (including obfuscated ones like 'name [at] domain dot com' or 'name(at)domain(dot)com')
+- All phone numbers (in any format)
+- Any other direct contact information (Telegram, WhatsApp, etc.)
+
+Respond ONLY with a JSON object, no markdown, no explanation, no code block. Use these keys: "email", "phone_number", "contact". If nothing is found, use empty strings.
+
+Example output:
+{"email": "john.doe@gmail.com", "phone_number": "+1-555-123-4567", "contact": "Telegram: @johndoe"}
+
+Profile Data:
+UC Berkeley Professor. Researcher in generative AI and Information Theory.
+Cofounder of Bespoke Labs 
+
+Professor, University of California Berkeley. 
+Co-Founder, Bespoke Labs: Data curation for post-training.
+
+---
+Response for https://www.linkedin.com/in/alex-dimakis-b1b20320/:
+{"email": "", "phone_number": "", "contact": ""}
+---
+
+[DEBUG] Profile text for https://www.linkedin.com/in/gang-liu-3879a0248/:
+I am a fourth-year Ph.D. student in computer science and engineering, at the University of Notre Dame. My research interests are graph machine learning and data mining, with a focus on the applications of polymer and molecule property predictions. I am always interested in the topics of interpretability, generalization, and robustness in machine learning.
+
+Ph.D. Student at University of Notre Dame
+---
+
+Prompt for https://www.linkedin.com/in/gang-liu-3879a0248/:
+
+You are an expert at extracting contact information from text.
+Given the following LinkedIn profile data, extract:
+- All email addresses (including obfuscated ones like 'name [at] domain dot com' or 'name(at)domain(dot)com')
+- All phone numbers (in any format)
+- Any other direct contact information (Telegram, WhatsApp, etc.)
+
+Respond ONLY with a JSON object, no markdown, no explanation, no code block. Use these keys: "email", "phone_number", "contact". If nothing is found, use empty strings.
+
+Example output:
+{"email": "john.doe@gmail.com", "phone_number": "+1-555-123-4567", "contact": "Telegram: @johndoe"}
+
+Profile Data:
+I am a fourth-year Ph.D. student in computer science and engineering, at the University of Notre Dame. My research interests are graph machine learning and data mining, with a focus on the applications of polymer and molecule property predictions. I am always interested in the topics of interpretability, generalization, and robustness in machine learning.
+
+Ph.D. Student at University of Notre Dame
+
+---
+Response for https://www.linkedin.com/in/gang-liu-3879a0248/:
+{"email": "", "phone_number": "", "contact": ""}
+---
+
+[DEBUG] Profile text for https://www.linkedin.com/in/shirin-khosravi-jam/:
+Hi there! I’m a data scientist who loves solving interesting problems. My journey into data science started with mathematics and some self-taught programming skills. I work on diverse projects: from optimizing marketing campaigns, forecasting lifetime value and developing recommendation systems, to building AI Agent systems.
+
+Over the years, I’ve been fortunate enough to work on building and deploying scalable machine learning models on AWS to help solve real business challenges.
+
+I have created a blog, where I share real-world insights into data science, machine learning, LLMs, and MLOps. Feel free to explore it here
+
+JAM with AI  
+🔗https://jamwithai.substack.com/
+
+Sr. Data Scientist (30k+)| FinTech | LLM | RecSys | MLOps | AWS
+---
+
+Prompt for https://www.linkedin.com/in/shirin-khosravi-jam/:
+
+You are an expert at extracting contact information from text.
+Given the following LinkedIn profile data, extract:
+- All email addresses (including obfuscated ones like 'name [at] domain dot com' or 'name(at)domain(dot)com')
+- All phone numbers (in any format)
+- Any other direct contact information (Telegram, WhatsApp, etc.)
+
+Respond ONLY with a JSON object, no markdown, no explanation, no code block. Use these keys: "email", "phone_number", "contact". If nothing is found, use empty strings.
+
+Example output:
+{"email": "john.doe@gmail.com", "phone_number": "+1-555-123-4567", "contact": "Telegram: @johndoe"}
+
+Profile Data:
+Hi there! I’m a data scientist who loves solving interesting problems. My journey into data science started with mathematics and some self-taught programming skills. I work on diverse projects: from optimizing marketing campaigns, forecasting lifetime value and developing recommendation systems, to building AI Agent systems.
+
+Over the years, I’ve been fortunate enough to work on building and deploying scalable machine learning models on AWS to help solve real business challenges.
+
+I have created a blog, where I share real-world insights into data science, machine learning, LLMs, and MLOps. Feel free to explore it here
+
+JAM with AI  
+🔗https://jamwithai.substack.com/
+
+Sr. Data Scientist (30k+)| FinTech | LLM | RecSys | MLOps | AWS
+
+---
+Response for https://www.linkedin.com/in/shirin-khosravi-jam/:
+{"email": "", "phone_number": "", "contact": ""}
+---
+
+[DEBUG] Profile text for https://www.linkedin.com/in/karan-khanuja-315733146/:
+Hi all, I'm a full-stack data scientist who gets the entire data science journey—from gathering data to deploying solutions. I dive into data mining, analysis, machine learning, and data engineering, and I'm just as comfortable building APIs, managing data pipelines, and working with databases as I am designing user interfaces and deploying models. Beyond the tech, I value clear communication and collaboration across teams, always keeping an eye on how technical solutions drive real business results.
+
+Certifications: Nanodegree in Data Science by Udacity.com,  Certified Data Scientist by Codecademy.com 
+Tech Stack: Python, PySpark, SQL Server, Redshift, BigQuery, Tableau, Periscope, Amazon Web Services (S3, Kinesis, Glue, Athena, Redshift, Dynamodb, Data Pipeline, SageMaker), Azure Services, Google Cloud Platform, Google Cloud Storage, GCLI, ACLI
+Data Science: Data Analysis, Data Visualization, Data Wrangling, ETL, API Development and Integration, Data Research, Data Profiling, Web Scrapping, Data Mapping, Data Transfer, Data Migration
+Machine Learning: Regression, Logistic Regression, Support Vector Machine, Decision Tree, Random Forest, Naïve Bayes, Gradient Boosting, Principle Component Analysis, K-means, Collaborative filtering, k-NN, ARIMA, SARIMA, Bagging, Boosting
+
+Data Science @ Amazon | Full-Stack Data Scientist | ML Practitioner | Python Developer
+---
+
+Prompt for https://www.linkedin.com/in/karan-khanuja-315733146/:
+
+You are an expert at extracting contact information from text.
+Given the following LinkedIn profile data, extract:
+- All email addresses (including obfuscated ones like 'name [at] domain dot com' or 'name(at)domain(dot)com')
+- All phone numbers (in any format)
+- Any other direct contact information (Telegram, WhatsApp, etc.)
+
+Respond ONLY with a JSON object, no markdown, no explanation, no code block. Use these keys: "email", "phone_number", "contact". If nothing is found, use empty strings.
+
+Example output:
+{"email": "john.doe@gmail.com", "phone_number": "+1-555-123-4567", "contact": "Telegram: @johndoe"}
+
+Profile Data:
+Hi all, I'm a full-stack data scientist who gets the entire data science journey—from gathering data to deploying solutions. I dive into data mining, analysis, machine learning, and data engineering, and I'm just as comfortable building APIs, managing data pipelines, and working with databases as I am designing user interfaces and deploying models. Beyond the tech, I value clear communication and collaboration across teams, always keeping an eye on how technical solutions drive real business results.
+
+Certifications: Nanodegree in Data Science by Udacity.com,  Certified Data Scientist by Codecademy.com 
+Tech Stack: Python, PySpark, SQL Server, Redshift, BigQuery, Tableau, Periscope, Amazon Web Services (S3, Kinesis, Glue, Athena, Redshift, Dynamodb, Data Pipeline, SageMaker), Azure Services, Google Cloud Platform, Google Cloud Storage, GCLI, ACLI
+Data Science: Data Analysis, Data Visualization, Data Wrangling, ETL, API Development and Integration, Data Research, Data Profiling, Web Scrapping, Data Mapping, Data Transfer, Data Migration
+Machine Learning: Regression, Logistic Regression, Support Vector Machine, Decision Tree, Random Forest, Naïve Bayes, Gradient Boosting, Principle Component Analysis, K-means, Collaborative filtering, k-NN, ARIMA, SARIMA, Bagging, Boosting
+
+Data Science @ Amazon | Full-Stack Data Scientist | ML Practitioner | Python Developer
+
+---
+Response for https://www.linkedin.com/in/karan-khanuja-315733146/:
+{"email": "", "phone_number": "", "contact": ""}
+---
+[WARNING] No profile match for https://www.linkedin.com/in/vsadhwani/ (normalized: https://linkedin.com/in/vsadhwani)

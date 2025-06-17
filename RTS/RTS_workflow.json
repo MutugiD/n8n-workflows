@@ -1,0 +1,1972 @@
+{
+  "name": "RTS_workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -940,
+        0
+      ],
+      "id": "3f425f55-c070-4348-b442-5328221aea2e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "agentId": "8192378268637371",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.phantombuster",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        0
+      ],
+      "id": "8722aeb1-f551-435b-8189-ea3ce595ab5d",
+      "name": "launchPhantombuster",
+      "credentials": {
+        "phantombusterApi": {
+          "id": "0JgpvAley1ASiU8O",
+          "name": "Phantombuster B"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getOutput",
+        "agentId": "8192378268637371",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.phantombuster",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        0
+      ],
+      "id": "275e5994-5fe0-4df7-ad94-41c7e649e7e5",
+      "name": "outputPhantombuster",
+      "credentials": {
+        "phantombusterApi": {
+          "id": "0JgpvAley1ASiU8O",
+          "name": "Phantombuster B"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node: Extract contact-level data from enriched profile\n\nconst contactFields = [\n  'firstName',\n  'lastName',\n  'extractedEmail',\n  'extractedContact',\n  'profileUrl',\n  'linkedinProfileUrl',\n  'linkedinHeadline',\n  'linkedinJobTitle',\n  'linkedinJobDescription',\n  'linkedinJobLocation',\n  'linkedinConnectionsCount',\n  'linkedinSkillsLabel',\n  'location'\n];\n\nconst items = $input.all();\nconst contactItems = items.map(item => {\n  const profile = item.json;\n  const contactData = {};\n  for (const field of contactFields) {\n    if (profile[field] !== undefined) {\n      contactData[field] = profile[field];\n    }\n  }\n  return { json: contactData };\n});\n\nreturn contactItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        -320
+      ],
+      "id": "35582e98-43a9-4616-9ef9-70b91c07ee82",
+      "name": "contactLevel"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node: Extract company-level data from enriched profile\n\nconst companyFields = [\n  'profileUrl', \n  'companyName',\n  'companyIndustry',\n  'companyWebsite',\n  'linkedinCompanyUrl',\n  'linkedinCompanySlug',\n  'linkedinCompanyDescription',\n  'linkedinCompanyTagline',\n  'linkedinCompanyFollowerCount',\n  'linkedinCompanyWebsite',\n  'linkedinCompanyEmployeesCount',\n  'linkedinCompanySize',\n  'linkedinCompanyHeadquarter',\n  'linkedinCompanyIndustry',\n  'linkedinCompanyFounded',\n  'linkedinCompanySpecialities'\n];\n\nconst items = $input.all();\nconst companyItems = items.map(item => {\n  const profile = item.json;\n  const companyData = {};\n  for (const field of companyFields) {\n    if (profile[field] !== undefined) {\n      companyData[field] = profile[field];\n    }\n  }\n  return { json: companyData };\n});\n\nreturn companyItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        60,
+        0
+      ],
+      "id": "7252bb15-c4ec-467a-a73a-41460da2b5cd",
+      "name": "companyLevel"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        -160
+      ],
+      "id": "ef188fbd-3546-455e-a6ce-2e432eed2452",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "DjQUyX9tGFM3zuil",
+          "name": "OpenAI Acc1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        340,
+        180
+      ],
+      "id": "2a1b0fc6-0d5e-469b-b414-924b53b0c3de",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "DjQUyX9tGFM3zuil",
+          "name": "OpenAI Acc1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalizeLinkedinUrl(url) {\n  if (!url) return '';\n  let normalized = url.trim();\n  normalized = normalized.replace(/^https:\\/\\/linkedin\\.com/, 'https://www.linkedin.com');\n  if (!normalized.endsWith('/')) normalized += '/';\n  return normalized;\n}\n\nreturn $input.all()\n  .filter(item => item.json.linkedinProfileUrl && item.json.linkedinProfileUrl.trim() !== '')\n  .map(item => ({\n    json: {\n      linkedinProfileUrl: normalizeLinkedinUrl(item.json.linkedinProfileUrl),\n      Domain: item.json.linkedinCompanyUrl || '',\n      'Apollo enrichment': item.json.extractedEmail || ''\n    }\n  }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        60,
+        320
+      ],
+      "id": "54c7a63d-4457-4029-b301-2de4790f3bbd",
+      "name": "filterMatches"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items[0].json contains the profile data\n// Output: items[0].json with added contact fields\n\nconst OPENAI_API_KEY = '';\n\n// Helper function to robustly normalize email obfuscations\nfunction normalizeObfuscatedEmails(text) {\n  return text\n    // Replace various [at], (at), {at}, at, AT, etc. with @\n    .replace(/\\s*\\[at\\]|\\(at\\)|\\{at\\}|\\sat\\s|\\sat\\.|\\sat,|\\sat\\b|\\sAT\\s|\\sAT\\.|\\sAT,|\\sAT\\b/gi, '@')\n    // Replace various [dot], (dot), {dot}, dot, DOT, etc. with .\n    .replace(/\\s*\\[dot\\]|\\(dot\\)|\\{dot\\}|\\sdot\\s|\\sdot\\.|\\sdot,|\\sdot\\b|\\sDOT\\s|\\sDOT\\.|\\sDOT,|\\sDOT\\b/gi, '.')\n    // Replace obfuscated at and dot with @ and .\n    .replace(/\\s+at\\s+/gi, '@')\n    .replace(/\\s+dot\\s+/gi, '.')\n    // Remove spaces around @ and .\n    .replace(/\\s*@\\s*/g, '@')\n    .replace(/\\s*\\.\\s*/g, '.')\n    // Remove any trailing punctuation after email parts\n    .replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+)\\.+/g, '$1.');\n}\n\nfunction extractEmails(text) {\n  const normalized = normalizeObfuscatedEmails(text);\n  // Extract emails using regex\n  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;\n  const emails = normalized.match(emailRegex) || [];\n  return emails.map(email => email.trim()).filter(email => email.includes('@') && email.includes('.'));\n}\n\n// Helper function to extract phone numbers\nfunction extractPhones(text) {\n  const phoneRegex = /(?:\\+\\d{1,3}[-.\\s]?)?\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}/g;\n  return text.match(phoneRegex) || [];\n}\n\nasync function extractContacts(profile) {\n  // Combine relevant text fields\n  const text = [\n    profile.linkedinDescription || '',\n    profile.linkedinJobDescription || '',\n    profile.linkedinHeadline || ''\n  ].join('\\n');\n\n  // Extract using regex first\n  const emails = extractEmails(text);\n  const phones = extractPhones(text);\n\n  // If we found emails, return them immediately\n  if (emails.length > 0) {\n    return {\n      extractedEmail: emails[0],\n      extractedPhoneNumber: phones[0] || '',\n      extractedContact: emails.join('; ')\n    };\n  }\n\n  // If no emails found, try GPT-4o for any other contact info\n  const prompt = `Extract contact information from this LinkedIn profile text. Return ONLY a JSON object with these fields:\\n{\\n  \"email\": \"extracted email or empty string\",\\n  \"phone\": \"extracted phone or empty string\",\\n  \"other_contact\": \"any other contact info or empty string\"\\n}\\n\\nText: ${text}`;\n\n  try {\n    const response = await $http.post({\n      url: 'https://api.openai.com/v1/chat/completions',\n      headers: {\n        'Authorization': `Bearer ${OPENAI_API_KEY}`,\n        'Content-Type': 'application/json'\n      },\n      body: JSON.stringify({\n        model: 'gpt-4o',\n        messages: [{ role: 'user', content: prompt }],\n        temperature: 0.1\n      })\n    });\n    const result = JSON.parse(response.body.choices[0].message.content);\n    return {\n      extractedEmail: result.email || '',\n      extractedPhoneNumber: result.phone || '',\n      extractedContact: result.other_contact || ''\n    };\n  } catch (error) {\n    return {\n      extractedEmail: '',\n      extractedPhoneNumber: '',\n      extractedContact: ''\n    };\n  }\n}\n\n// Process all input items\nconst items = $input.all();\nconst enrichedItems = [];\n\nfor (const item of items) {\n  const profile = item.json;\n  if (!profile) {\n    enrichedItems.push(item);\n    continue;\n  }\n  const contacts = await extractContacts(profile);\n  enrichedItems.push({\n    json: {\n      ...profile,\n      ...contacts\n    }\n  });\n}\n\nreturn enrichedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        0
+      ],
+      "id": "010fe4dc-ffe3-4c25-8180-09e070777748",
+      "name": "contactEnrichment"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert B2B sales research assistant. Given the following company-level data, generate a concise, actionable company plan for a sales prospecting strategy.\nFocus on:\n•\tThe company’s core business, industry, and unique value proposition\n•\tSize, location, and growth signals (e.g., recent funding, hiring, expansion, new product launches)\n•\tKey decision-makers or departments relevant for outreach\n•\tNotable technologies, partnerships, or differentiators\n•\tSignals of business needs, pain points, or openness to new solutions\nCompany Data:\nprofileUrl: {{ $json. profileUrl }}\nName: {{ $json.companyName }}\nIndustry: {{ $json.companyIndustry }}\nWebsite: {{ $json.companyWebsite }}\nLinkedIn: {{ $json.linkedinCompanyUrl }}\nDescription: {{ $json.linkedinCompanyDescription }}\nTagline: {{ $json.linkedinCompanyTagline }}\nSize: {{ $json.linkedinCompanySize }}\nHeadquarters: {{ $json.linkedinCompanyHeadquarter }}\nFounded: {{ $json.linkedinCompanyFounded }}\nSpecialties: {{ $json.linkedinCompanySpecialities }}\nFollowers: {{ $json.linkedinCompanyFollowerCount }}\nLocation: {{ $json.linkedinCompanyHeadquarter }}\n\nInstructions:\nUse the company’s full name in the \"name\" field.\nWrite a professional, concise summary and actionable recommendations.\nOnly include information that is present or can be reasonably inferred from the data.\nIf any field is missing, leave it blank in the output JSON.\nReturn your answer as a JSON object with these fields:\n{\n  “profileUrl”: “linkedin profile link”\n  \"name\": \"The full name of the company.\",\n  \"companyPlan\": \"A recommended approach for outreach (e.g., reference a recent event, propose a solution to a likely business need, suggest a workable proposal for the business based on recent needs, etc.).\",\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        320,
+        0
+      ],
+      "id": "ed4bcda0-b0e1-43d3-8ffd-f33440a00581",
+      "name": "companyAgent"
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalizeLinkedinUrl(url) {\n  if (!url) return '';\n  let normalized = url.trim();\n  normalized = normalized.replace(/^https:\\/\\/linkedin\\.com/, 'https://www.linkedin.com');\n  if (!normalized.endsWith('/')) normalized += '/';\n  return normalized;\n}\n\nreturn $input.all()\n  .filter(item => item.json.output && item.json.output.linkedinProfileUrl && item.json.output.linkedinProfileUrl.trim() !== '')\n  .map(item => ({\n    json: {\n      linkedinProfileUrl: normalizeLinkedinUrl(item.json.output.linkedinProfileUrl),\n      'Contact Plan': item.json.output.ContactPlan || '',\n      'Outreach Strategy': item.json.output.OutreachStrategy || ''\n    }\n  }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        -320
+      ],
+      "id": "a82dbe3d-827b-4ef9-aa4d-77c4aa48b57d",
+      "name": "summariserFilter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert B2B sales strategist. Given the following contact-level LinkedIn data, generate a concise, actionable sales prospecting plan. Focus on creating a tailored approach for engaging with the prospect based on their role, experience, and potential needs.\nRelevant Contact Data:\nName: {{ $json.firstName }} {{ $json.lastName }}\nEmail: {{ $json.extractedEmail }}\nLinkedIn: {{ $json.profileUrl }}\nHeadline: {{ $json.linkedinHeadline }}\nJob Title: {{ $json.linkedinJobTitle }}\nJob Description: {{ $json.linkedinJobDescription }}\nSkills: {{ $json.linkedinSkillsLabel }}\nLocation: {{ $json.location }}\nInstructions:\n•\tGenerate a contact plan and an outreach strategy.\n•\tFocus on actionable insights and specific outreach recommendations.\n•\tKeep the contact plan concise and relevant to their role/industry.\n•\tThe outreach strategy should be a short phrase summarizing the approach.\nReturn only the recommended outreach approach as plain text, no JSON, no explanation, no markdown.\n{\"linkedinProfileUrl\":{{ $json.profileUrl }} , \n\"ContactPlan\": \"A single paragraph of 1-2 sentences max,  specific, actionable outreach recommendations based on their role, experience, and potential needs. Focus on how to approach them and what value to offer.\"\n“\n“OutreachStrategy”: “4-5 words to act as the outreach strategy. Synthesize ContactPlan information and other pieces of data to generate a concise, actionable outreach strategy. The output should be only the recommended approach for outreach. Be specific about the strategy, dependent on industry. Do not be vague like \"Empower recovery through collaboration\". Be accurate and to the point\"\n” \n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        320,
+        -320
+      ],
+      "id": "ee029af7-6f09-41f9-a55e-41d319c86fa5",
+      "name": "contactLevelAgent"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "[\n  {\n    \"linkedinProfileUrl\": \"https://www.linkedin.com/in/hpsc24/\",\n    \"ContactPlan\": \"Reach out with a personalized message acknowledging their passion for advocacy and significant cases they have worked on, particularly the Maui fire. Offer insights on how your services can enhance lead generation and support for the insurance and nursing sectors, aligning with their goal of empowering affected communities.\",\n    \"OutreachStrategy\": \"Advocacy and support enhancement\"\n  },\n  {\n    \"linkedinProfileUrl\": \"https://www.linkedin.com/in/johndoe/\",\n    \"ContactPlan\": \"Send a tailored message highlighting their expertise in software development and recent projects. Discuss potential collaborations and how your solutions can streamline their development process, focusing on efficiency and innovation.\",\n    \"OutreachStrategy\": \"Collaborate on software innovation\"\n  },\n  {\n    \"linkedinProfileUrl\": \"https://www.linkedin.com/in/janesmith/\",\n    \"ContactPlan\": \"Connect with a message recognizing their extensive experience in marketing strategy. Propose a discussion on how your tools can enhance their current marketing efforts and drive better engagement.\",\n    \"OutreachStrategy\": \"Personalized marketing collaboration proposal\"\n  }\n]\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        500,
+        -180
+      ],
+      "id": "f8e87bf3-b72e-44d4-baee-a0b29a4ba058",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI",
+          "mode": "list",
+          "cachedResultName": "RTS-TEST-DATA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "linkedinProfileUrl": "={{ $json.linkedinProfileUrl }}",
+            "Domain": "={{ $json.Domain }}",
+            "Apollo enrichment": "={{ $json[\"Apollo enrichment\"] }}"
+          },
+          "matchingColumns": [
+            "linkedinProfileUrl"
+          ],
+          "schema": [
+            {
+              "id": "linkedinProfileUrl",
+              "displayName": "linkedinProfileUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Domain",
+              "displayName": "Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Apollo enrichment",
+              "displayName": "Apollo enrichment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Contact Plan",
+              "displayName": "Contact Plan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company Plan",
+              "displayName": "Company Plan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Outreach stratergy",
+              "displayName": "Outreach stratergy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email_added",
+              "displayName": "email_added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        600,
+        320
+      ],
+      "id": "a24b9f26-f1af-4510-9504-68d0933fac57",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UoBinajigu7kSCmW",
+          "name": "Mutugi-n-test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"linkedInURL\": \"https://www.linkedin.com/in/johndoe\",\n    \"name\": \"Tech Innovators Inc.\",\n    \"CompanyPlan\": \"Propose a partnership focusing on integrating our advanced software solutions with their existing tech infrastructure.\"\n  },\n  {\n    \"linkedInURL\": \"https://www.linkedin.com/in/janesmith\",\n    \"name\": \"Green Energy Solutions\",\n    \"CompanyPlan\": \"Suggest a collaboration on sustainable energy projects, highlighting mutual benefits in innovation and market expansion.\"\n  }\n]\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        500,
+        180
+      ],
+      "id": "d45f2672-5e97-4780-8335-c90cd1bf2e69",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalizeLinkedinUrl(url) {\n  if (!url) return '';\n  let normalized = url.trim();\n  normalized = normalized.replace(/^https:\\/\\/linkedin\\.com/, 'https://www.linkedin.com');\n  if (!normalized.endsWith('/')) normalized += '/';\n  return normalized;\n}\n\nreturn $input.all()\n  .filter(item => Array.isArray(item.json.output) && item.json.output.length > 0 && item.json.output[0].linkedInURL && item.json.output[0].linkedInURL.trim() !== '')\n  .map(item => ({\n    json: {\n      linkedinProfileUrl: normalizeLinkedinUrl(item.json.output[0].linkedInURL),\n      'Company Plan': item.json.output[0].CompanyPlan || ''\n    }\n  }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "c9e77bfa-cc5f-47ef-bf6b-2f9b6c86f809",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI",
+          "mode": "list",
+          "cachedResultName": "RTS-TEST-DATA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "linkedinProfileUrl": "={{ $json.linkedinProfileUrl }}",
+            "Contact Plan": "={{ $json[\"Contact Plan\"] }}",
+            "Outreach stratergy": "={{ $json[\"Outreach Strategy\"] }}"
+          },
+          "matchingColumns": [
+            "linkedinProfileUrl"
+          ],
+          "schema": [
+            {
+              "id": "linkedinProfileUrl",
+              "displayName": "linkedinProfileUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Domain",
+              "displayName": "Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Apollo enrichment",
+              "displayName": "Apollo enrichment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Contact Plan",
+              "displayName": "Contact Plan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Plan",
+              "displayName": "Company Plan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Outreach stratergy",
+              "displayName": "Outreach stratergy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email_added",
+              "displayName": "email_added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1080,
+        -320
+      ],
+      "id": "7cdfb597-ac0f-485a-9340-d4ab16c427ba",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UoBinajigu7kSCmW",
+          "name": "Mutugi-n-test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI",
+          "mode": "list",
+          "cachedResultName": "RTS-TEST-DATA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "linkedinProfileUrl": "={{ $json.linkedinProfileUrl }}",
+            "Company Plan": "={{ $json[\"Company Plan\"] }}"
+          },
+          "matchingColumns": [
+            "linkedinProfileUrl"
+          ],
+          "schema": [
+            {
+              "id": "linkedinProfileUrl",
+              "displayName": "linkedinProfileUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Domain",
+              "displayName": "Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Apollo enrichment",
+              "displayName": "Apollo enrichment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Contact Plan",
+              "displayName": "Contact Plan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company Plan",
+              "displayName": "Company Plan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Outreach stratergy",
+              "displayName": "Outreach stratergy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email_added",
+              "displayName": "email_added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1080,
+        0
+      ],
+      "id": "09f3925a-a063-4e43-98d9-58c92193f376",
+      "name": "Google Sheets2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UoBinajigu7kSCmW",
+          "name": "Mutugi-n-test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const apolloEmail = item.json['Apollo enrichment'] || '';\n  return {\n    json: {\n      ...item.json,\n      email_added: apolloEmail.trim() !== '' ? 'Available' : ''\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        320
+      ],
+      "id": "6895ec99-a42d-483a-b4b4-80891e94f88d",
+      "name": "email_added?"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI",
+          "mode": "list",
+          "cachedResultName": "RTS-TEST-DATA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "linkedinProfileUrl": "={{ $json.linkedinProfileUrl }}",
+            "email_added": "={{ $json.email_added }}"
+          },
+          "matchingColumns": [
+            "linkedinProfileUrl"
+          ],
+          "schema": [
+            {
+              "id": "linkedinProfileUrl",
+              "displayName": "linkedinProfileUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Domain",
+              "displayName": "Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Apollo enrichment",
+              "displayName": "Apollo enrichment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Contact Plan",
+              "displayName": "Contact Plan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company Plan",
+              "displayName": "Company Plan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Outreach stratergy",
+              "displayName": "Outreach stratergy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email_added",
+              "displayName": "email_added",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1880,
+        20
+      ],
+      "id": "6b8793b7-5305-4d2d-8cda-b6fbc8b3ff0d",
+      "name": "Google Sheets3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UoBinajigu7kSCmW",
+          "name": "Mutugi-n-test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1560,
+        0
+      ],
+      "id": "2ee15545-55ba-4ae7-a0c1-f0d6b97bb311",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {
+    "outputPhantombuster": [
+      {
+        "json": {
+          "companyIndustry": "Law Practice",
+          "companyName": "Pursuing",
+          "companyWebsite": "https://www.pursuing.com",
+          "firstName": "Hart",
+          "lastName": "Cunningham",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/pursuing/",
+          "linkedinCompanySlug": "pursuing",
+          "linkedinDescription": "2028 DNC POTUS candidate since 6/1/18:\n1) End genocide globally \n2) Pardon 100k protestors \n3) Nuremberg type trials\n4) Zero donations over $28\n5) Crush fascism",
+          "linkedinFollowersCount": "5857",
+          "linkedinHeadline": "\nTORTS leader for Depo-Provera & PFAS",
+          "linkedinIsHiringBadge": "false",
+          "linkedinIsOpenToWorkBadge": "false",
+          "linkedinJobDateRange": "Mar 2020 - Present",
+          "linkedinJobDescription": "My professional focus has been intensely directed towards significant cases such as Camp L, Talcum, Roundup, and the Maui fire. The latter, a personal tragedy, where I lost friends, has only strengthened my resolve. Relocating to Arizona has marked a new chapter in my mission to support and empower those affected by such devastating events.\n\nIn addition to my advocacy in these areas, I also specialize in the provision of quality leads and transfers in the insurance and nursing sectors. My goal is to facilitate meaningful connections that aid recovery and bring about positive change.",
+          "linkedinJobLocation": "Dallas, Texas, United States",
+          "linkedinJobTitle": "Company Owner",
+          "linkedinPreviousCompanySlug": "spotify",
+          "linkedinPreviousJobDateRange": "May 2016 - Present",
+          "linkedinPreviousJobDescription": "As Ryderman, my journey through the electronic music landscape has culminated in the creation of two spectacular albums that epitomize the essence of uplifting EDM. With over 5 million streams, these albums represent my passionate fusion of vibrant beats, euphoric melodies, and energetic rhythms. Each track reflects my meticulous attention to production and sound design. My music aims to resonate with joy and exhilaration, capturing the spirit of EDM. The reception from fans and critics has been overwhelmingly positive, praising my work for its ability to transport listeners to a state of blissful escape. These albums are more than just collections of songs; they are immersive experiences designed to uplift, energize, and inspire.",
+          "linkedinPreviousJobLocation": "Scottsdale, Arizona, United States",
+          "linkedinPreviousJobTitle": "Professional Musician",
+          "linkedinPreviousSchoolUrl": "https://linkedin.com/school/harvard-university",
+          "linkedinPreviousSchoolCompanySlug": "harvard-university",
+          "linkedinPreviousSchoolDateRange": "Feb 2018 - Aug 2018",
+          "linkedinPreviousSchoolDescription": "My time at Harvard was marked by rigorous academic challenges and engaging in seminars, workshops that enriched my knowledge and professional network. Alongside my on-campus education, I completed an intensive online course in Social Services, which provided me with a comprehensive understanding of key topics in the field and enhanced my skills for professional growth in social services. This blend of traditional and online education has equipped me with a diverse set of skills and a broad perspective, essential in my professional journey.",
+          "linkedinPreviousSchoolName": "Harvard University",
+          "linkedinProfileId": "1182791989",
+          "linkedinProfileSlug": "hpsc24",
+          "linkedinProfileUrl": "https://linkedin.com/in/hpsc24",
+          "linkedinProfileUrn": "ACoAAEZ_-TUBu_BqewHahx_6wl-OPJLbQJyEmZA",
+          "linkedinSchoolUrl": "https://linkedin.com/school/claremont-graduate-university",
+          "linkedinSchoolCompanySlug": "claremont-graduate-university",
+          "linkedinSchoolDateRange": "Feb 1996 - Jan 1999",
+          "linkedinSchoolDegree": "Master of Business Administration - MBA",
+          "linkedinSchoolDescription": "During my tenure at Claremont Graduate University, I embarked on an ambitious academic path, taking a dozen classes while simultaneously serving as a mathematics tutor for Pomona Pitzer. This challenging schedule was balanced with my active participation in sports, where I excelled in both baseball and track. My dedication and hard work culminated in a significant achievement: graduating with a Master's degree at the age of 22, making me the youngest graduate in the program's history. This period of intense academic pursuit, coupled with athletic endeavors and tutoring responsibilities, honed my skills in time management, discipline, and perseverance.",
+          "linkedinSchoolName": "Claremont Graduate University",
+          "linkedinSkillsLabel": "Music Production, Music Composition, Music Education, Torts, Engineering Mathematics, Loyalty Programs, Enterprise IT Infrastructure, Product Strategy, B2B Marketing Strategy, Teamwork, Problem Solving, Leadership, Insurance Marketing, Product Development, Software Development, Organizational Development, Leadership Development, Business Development, Athlete Development, Athletics",
+          "location": "Haiku, Hawaii, United States",
+          "previousCompanyName": "Spotify",
+          "connectionDegree": "1st",
+          "refreshedAt": "2025-06-13T20:04:03.263Z",
+          "mutualConnectionsUrl": "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&facetConnectionOf=%5B%22ACoAAEZ_-TUBu_BqewHahx_6wl-OPJLbQJyEmZA%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH&RESULT_TYPE=PEOPLE",
+          "connectionsUrl": "https://www.linkedin.com/search/results/people/?facetConnectionOf=%5B%22ACoAAEZ_-TUBu_BqewHahx_6wl-OPJLbQJyEmZA%22%5D&facetNetwork=%5B%22F%22%2C%22S%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH",
+          "linkedinConnectionsCount": "500",
+          "profileUrl": "https://www.linkedin.com/in/hpsc24/",
+          "linkedinCompanyName": "Pursuing",
+          "linkedinCompanyDescription": "Engineers focused on equality, environmentalism, progress as a culture, and civilization.  The organization is owned by Hart - connect via LinkedIn for any relationships regarding marketing, sales, or growth. \n\n\n\nhttps://www.linkedin.com/mwlite/in/hart-pearson-sebastian-cunningham-a53a15241",
+          "linkedinCompanyTagline": "To chase, follow or take legal action against someone or something, to catch them, attack them, or get a legal remedy,",
+          "linkedinCompanyFollowerCount": "120",
+          "linkedinCompanyWebsite": "https://www.pursuing.com",
+          "linkedinCompanyEmployeesCount": "79",
+          "linkedinCompanySize": "2-10 employees",
+          "linkedinCompanyHeadquarter": "California, US",
+          "linkedinCompanyIndustry": "Legal Services",
+          "linkedinCompanyFounded": "2022",
+          "linkedinCompanySpecialities": "Legal Services, Lawyers Directory, Leagal Guides, Law Schools Directory, Legal Advice, Legal Q & A, Lawyer Marketing Services",
+          "scraperProfileId": "95754451",
+          "scraperFullName": "Mutugi Nkonge ",
+          "linkedinPreviousSchoolDegree": ""
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Computer Software",
+          "companyName": "Mercor",
+          "companyWebsite": "mercor.com/?utm_source=linkedin&utm_medium=bio",
+          "firstName": "Shaun",
+          "lastName": "VanWeelden",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/mercor-ai/",
+          "linkedinCompanySlug": "mercor-ai",
+          "linkedinDescription": "Hey there, I'm Shaun! I love being the bridge between engineers and everyone else and thrive in environments where soft skills are just as important as technical skills. I'm am an extreme power-user of products and I love to nerd out with APIs, Computer Vision, Salesforce, and all sorts of data.\n\nGetting to use both my soft skills and technical skills on a regular basis is important to me. I genuinely enjoy managing and building teams and working with people from all backgrounds and experiences. Leveraging my technical experiences to improve processes and empower others is what gets me up in the morning.\n\nI graduated from Iowa State University in 2016, where I received my B.S. in Software Engineering. During my academic career, I was able to do a full-time internship at 6 different amazing companies including Twilio, Microsoft, Amazon, Boeing, the MathWorks, and Union Pacific. During these internships, I gained great insight into what software engineering is all about and was able to pick up best practices from a wide variety of work environments. \n\nLET'S CONNECT\nFeel free to send me an email any time, shauntvanweelden [AT] gmail [DOT] com",
+          "linkedinFollowersCount": "7515",
+          "linkedinHeadline": "Managing Director at Mercor (ex-OpenAI, ex-Scale AI)",
+          "linkedinIsHiringBadge": "false",
+          "linkedinIsOpenToWorkBadge": "false",
+          "linkedinJobDateRange": "",
+          "linkedinJobDescription": "Scaled from $1M to $100M in annual revenue run rate in my first 11 months working with the team.\n\nI've had fun helping shape Mercor's strategy, go-to-market, compliance, and, most recently, Talent Success efforts, something near and dear to my heart.\n\nMy strategy is shaped by empathy, transparency, and vulnerability to our co-workers, our clients, and our talent.",
+          "linkedinJobLocation": "San Francisco Bay Area",
+          "linkedinJobTitle": "Managing Director",
+          "linkedinPreviousCompanySlug": "openai",
+          "linkedinPreviousJobDateRange": "",
+          "linkedinPreviousJobDescription": "Responsible for leading OpenAI's Human Data Operations. Human Data sits within research and is the team that provides the \"H\", humans, for all of the RLHF work OpenAI does.\n\nHighlights:\n\nResearch Collaboration\n - Partnered with researchers to define and understand their data collection requirements across all modalities\n- Led campaign scoping, design, and feedback processes to measure quality and ensure efficient annotation processes.\n\nTeam Leadership and Development\n- Led and hired a team to operationally support researchers, including TPMs to consult with researchers and Ops Specialists to run the data collection efforts with vendors.\n- Created job descriptions, identified recruiting partners, and stood up new employer of record (EOR) relationships.\n- Conducted 1:1s, managed performance, and created growth opportunities for team members.\n\nVendor Relationship Management\n- Managed vendor relationships in collaboration with procurement, accounting, and legal teams.\n- Implemented a new time tracking system, ensured vendor accountability, and negotiated contract terms, converting them to annual agreements.\n\nInternal Storytelling and Financial Planning\n- Communicated the human annotation process internally, partnering with strategic finance, FP&A, and product counsel.\n- Humans are darn expensive! I built the annual annotation budget and defined our operational strategy.\n\nExternal Advocacy and Public Relations\n- Collaborated with OpenAI’s communications, policy, and PR teams, civil society groups, and external experts to craft and share our human annotation story.\n- Created and executed a progressive program for data annotators, including vendor auditability, work hour caps, and ensuring all work is compensated.\n- Crafted much of OpenAI's response to congressional inquiries about how our models are developed with humans and provided support for litigation and legal inquiries.",
+          "linkedinPreviousJobLocation": "San Francisco Bay Area",
+          "linkedinPreviousJobTitle": "Human Data Ops Leader, Member of Program Staff",
+          "linkedinPreviousSchoolUrl": "",
+          "linkedinPreviousSchoolCompanySlug": "",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "",
+          "linkedinProfileId": "156373117",
+          "linkedinProfileSlug": "svanweelden",
+          "linkedinProfileUrl": "https://linkedin.com/in/svanweelden",
+          "linkedinProfileUrn": "ACoAAAlSEH0BpS2shkL1qw7lbTHfECC3P-2VG0s",
+          "linkedinSchoolUrl": "https://linkedin.com/school/iowastateu",
+          "linkedinSchoolCompanySlug": "iowastateu",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "Bachelor of Science",
+          "linkedinSchoolDescription": "At Iowa State, I loved being involved - I served as the president of our engineering student council, co-chaired our engineer career fair (which over 4000 students attended), led the hackathon planning for our university's first ever \"real\" hackathon, and I was once the student chair for Iowa FIRST LEGO League, one of Iowa State's largest engineering outreach programs (programs impacted over 3500 youth across the state)",
+          "linkedinSchoolName": "Iowa State University",
+          "linkedinSkillsLabel": "Web Development, JavaScript, HTML, Computer Vision, Image Processing, Entrepreneurship, Web Design, Programming, Software Development, Matlab, C#, Java, Python, Microsoft Office, C, ASP.NET MVC, jQuery, HTML5, CSS, Microsoft Excel",
+          "location": "San Francisco Bay Area",
+          "previousCompanyName": "OpenAI",
+          "connectionDegree": "1st",
+          "refreshedAt": "2025-06-13T20:04:05.863Z",
+          "mutualConnectionsUrl": "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&facetConnectionOf=%5B%22ACoAAAlSEH0BpS2shkL1qw7lbTHfECC3P-2VG0s%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH&RESULT_TYPE=PEOPLE",
+          "connectionsUrl": "https://www.linkedin.com/search/results/people/?facetConnectionOf=%5B%22ACoAAAlSEH0BpS2shkL1qw7lbTHfECC3P-2VG0s%22%5D&facetNetwork=%5B%22F%22%2C%22S%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH",
+          "linkedinConnectionsCount": "500",
+          "profileUrl": "https://www.linkedin.com/in/svanweelden/",
+          "linkedinCompanyName": "Mercor",
+          "linkedinCompanyDescription": "We use AI to understand human ability and match talent with the opportunities they're best suited for.",
+          "linkedinCompanyTagline": "We use AI to understand human ability and match talent with the opportunities they're best suited for.",
+          "linkedinCompanyFollowerCount": "300622",
+          "linkedinCompanyWebsite": "mercor.com/?utm_source=linkedin&utm_medium=bio",
+          "linkedinCompanyEmployeesCount": "585",
+          "linkedinCompanySize": "51-200 employees",
+          "linkedinCompanyHeadquarter": "California 94105, US",
+          "linkedinCompanyIndustry": "Software Development",
+          "linkedinCompanyFounded": "2023",
+          "linkedinCompanySpecialities": "",
+          "scraperProfileId": "95754451",
+          "scraperFullName": "Mutugi Nkonge ",
+          "linkedinPreviousSchoolDegree": ""
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Transportation/Trucking/Railroad",
+          "companyName": "FreshX",
+          "companyWebsite": "http://www.getfreshx.com",
+          "firstName": "Lance",
+          "lastName": "Hackney",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/freshxlogistics/",
+          "linkedinCompanySlug": "freshxlogistics",
+          "linkedinDescription": "",
+          "linkedinFollowersCount": "5142",
+          "linkedinHeadline": "Co-Founder at FreshX | The Only Platform for Refrigerated LTL",
+          "linkedinIsHiringBadge": "false",
+          "linkedinIsOpenToWorkBadge": "false",
+          "linkedinJobDateRange": "Jun 2023 - Present",
+          "linkedinJobDescription": "Instant quoting & booking for reefer LTL.",
+          "linkedinJobLocation": "Chicago, Illinois, United States",
+          "linkedinJobTitle": "COO & Co-Founder",
+          "linkedinPreviousCompanySlug": "universityofchicagoboothschoolofbusiness",
+          "linkedinPreviousJobDateRange": "Sep 2022 - Jun 2024",
+          "linkedinPreviousJobDescription": "",
+          "linkedinPreviousJobLocation": "Chicago, Illinois, United States",
+          "linkedinPreviousJobTitle": "MBA Candidate",
+          "linkedinPreviousSchoolUrl": "https://linkedin.com/school/uc-davis",
+          "linkedinPreviousSchoolCompanySlug": "uc-davis",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "University of California, Davis",
+          "linkedinProfileId": "232702433",
+          "linkedinProfileSlug": "lancehackney",
+          "linkedinProfileUrl": "https://linkedin.com/in/lancehackney",
+          "linkedinProfileUrn": "ACoAAA3eweEBwxX5eqBVhjWyrJfEeMUGh_Z4CfM",
+          "linkedinSchoolUrl": "https://linkedin.com/school/universityofchicagoboothschoolofbusiness",
+          "linkedinSchoolCompanySlug": "universityofchicagoboothschoolofbusiness",
+          "linkedinSchoolDateRange": "Sep 2022 - Jul 2024",
+          "linkedinSchoolDegree": "MBA Candidate",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "The University of Chicago Booth School of Business",
+          "linkedinSkillsLabel": "Production Planning, ERP Software, Written Communication, Product Demonstration, Salesforce.com, Sales, Performance Metrics, Channel Partners, Microsoft Excel, Program Management, Communication, Microsoft Office, Supply Planning, Problem Solving, Demand Planning, Team Management, Supply Chain Management, Supplier Relationship Management, Supplier Management, Negotiation",
+          "location": "San Francisco Bay Area",
+          "previousCompanyName": "The University of Chicago Booth School of Business",
+          "connectionDegree": "1st",
+          "refreshedAt": "2025-06-13T20:04:08.324Z",
+          "mutualConnectionsUrl": "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&facetConnectionOf=%5B%22ACoAAA3eweEBwxX5eqBVhjWyrJfEeMUGh_Z4CfM%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH&RESULT_TYPE=PEOPLE",
+          "connectionsUrl": "https://www.linkedin.com/search/results/people/?facetConnectionOf=%5B%22ACoAAA3eweEBwxX5eqBVhjWyrJfEeMUGh_Z4CfM%22%5D&facetNetwork=%5B%22F%22%2C%22S%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH",
+          "linkedinConnectionsCount": "500",
+          "profileUrl": "https://www.linkedin.com/in/lancehackney/",
+          "linkedinCompanyName": "FreshX",
+          "linkedinCompanyDescription": "Refrigerated capacity, at your fingertips.",
+          "linkedinCompanyTagline": "Refrigerated capacity, at your fingertips.",
+          "linkedinCompanyFollowerCount": "1703",
+          "linkedinCompanyWebsite": "http://www.getfreshx.com",
+          "linkedinCompanyEmployeesCount": "15",
+          "linkedinCompanySize": "2-10 employees",
+          "linkedinCompanyHeadquarter": "151 N Michigan Ave, IL 60601, US",
+          "linkedinCompanyIndustry": "Transportation, Logistics, Supply Chain and Storage",
+          "linkedinCompanyFounded": "2023",
+          "linkedinCompanySpecialities": "",
+          "scraperProfileId": "95754451",
+          "scraperFullName": "Mutugi Nkonge ",
+          "linkedinPreviousSchoolDegree": "Bachelor's Degree"
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Computer Software",
+          "companyName": "Stealth AI Startup",
+          "companyWebsite": "",
+          "firstName": "Paul",
+          "lastName": "Iusztin",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/stealthaistartup/",
+          "linkedinCompanySlug": "stealthaistartup",
+          "linkedinDescription": "I am a senior AI engineer and contractor with 8+ years of experience. I design and implement modular, scalable, and production-ready ML systems for startups worldwide.\n\nMy central mission is to build an AI academy and data-intensive AI/ML products that serve the world.\n\nSince training my first neural network in 2017,  I have 2 passions that fuel my mission:\n\n→ Designing and implementing production AI/ML systems using software engineering and MLOps best practices.\n\n→ Teaching people about the process.\n\n.\n\nI currently develop vertical AI agent solutions for a US startup. In the past, I built AI, ML and MLOps products for Metaphysic, CoreAI, Everseen, and Continental.\n\nI am the Founder of Decoding ML, a channel for battle-tested content on learning how to design, code, and deploy production-grade AI systems.\n\nAs a content creator, I co-authored the LLM Engineer’s Handbook, an Amazon bestseller and industry standard on LLM, RAG, and LLMOps solutions, which sold over 15k+ copies.\n\n.\n\nIf you want to learn how to build end-to-end production-ready AI systems with software engineering and MLOps best practices, subscribe to my Substack:\n\n🔗 https://decodingml.substack.com\n\n.\n\n💬 If you need AI solutions for your business, let’s discuss!\n\n🌎 Only open to full remote positions as a contractor.\n\n.\n\nContact:\n\n✉️ Email: p.b.iusztin@gmail.com\n\n💻 Decoding ML: https://decodingml.substack.com",
+          "linkedinFollowersCount": "68525",
+          "linkedinHeadline": "Senior AI Engineer • Founder @ Decoding ML ~ Building an army of AI agents and teaching you about the process.",
+          "linkedinIsHiringBadge": "false",
+          "linkedinIsOpenToWorkBadge": "false",
+          "linkedinJobDateRange": "Apr 2025 - Present",
+          "linkedinJobDescription": "",
+          "linkedinJobLocation": "",
+          "linkedinJobTitle": "Senior AI Engineer",
+          "linkedinPreviousCompanySlug": "decodingml",
+          "linkedinPreviousJobDateRange": "Jul 2023 - Present",
+          "linkedinPreviousJobDescription": "Content to help you design, code, and deploy production-grade AI, GenAI and information retrieval systems.",
+          "linkedinPreviousJobLocation": "",
+          "linkedinPreviousJobTitle": "Founder",
+          "linkedinPreviousSchoolUrl": "https://linkedin.com/school/politehnica-university-of-timisoara",
+          "linkedinPreviousSchoolCompanySlug": "politehnica-university-of-timisoara",
+          "linkedinPreviousSchoolDateRange": "Oct 2016 - Jul 2020",
+          "linkedinPreviousSchoolDescription": "My bachelor's thesis is based on researching neural networks to detect 3D traffic participants in LiDAR point clouds in autonomous driving scenarios.\n\n➞ Trained state-of-the-art models to detect traffic participants using LiDAR points clouds optimally.\n\n➞ Engineered the Dynamic Voxelization algorithm into the Point Pillars model, 𝐫𝐞𝐝𝐮𝐜𝐢𝐧𝐠 by 𝟒𝟎% the model's 𝐦𝐞𝐦𝐨𝐫𝐲 𝐮𝐬𝐚𝐠𝐞.\n\n🔧 𝐓𝐞𝐜𝐡𝐧𝐨𝐥𝐨𝐠𝐢𝐞𝐬: Python, Pytorch, Cuda C++, Numba, Node.js, Flask",
+          "linkedinPreviousSchoolName": "Universitatea Politehnica din Timişoara",
+          "linkedinProfileId": "604324200",
+          "linkedinProfileSlug": "pauliusztin",
+          "linkedinProfileUrl": "https://linkedin.com/in/pauliusztin",
+          "linkedinProfileUrn": "ACoAACQFQWgBqowPZBqBQgSC3ATmuatVfZkf6fE",
+          "linkedinSchoolUrl": "https://linkedin.com/school/politehnica-university-of-timisoara",
+          "linkedinSchoolCompanySlug": "politehnica-university-of-timisoara",
+          "linkedinSchoolDateRange": "Oct 2020 - Jul 2022",
+          "linkedinSchoolDegree": "Master's degree",
+          "linkedinSchoolDescription": "My dissertation is a deep reinforcement learning-based order execution algorithm that buys or sells assets at the proper time over a predetermined period to maximize the investor's price advantage. It is an algorithm for long-term investors who wish to buy and sell assets at a premium to maximize their compound interest over long periods.\n\n➞ On average, the algorithm 𝐫𝐞𝐚𝐥𝐢𝐳𝐞𝐝 a 𝟐.𝟖% 𝐦𝐨𝐧𝐭𝐡𝐥𝐲 𝐜𝐨𝐦𝐩𝐨𝐮𝐧𝐝 𝐢𝐧𝐭𝐞𝐫𝐞𝐬𝐭.\n\n➞ It leverages novel methods of making the time series stationary, fusing multiple context variables along the time axis using attention mechanisms to maximize the agent's understanding of the world, and teacher-student methods for better generalization and learning.\n\n🔧 𝐓𝐞𝐜𝐡𝐧𝐨𝐥𝐨𝐠𝐢𝐞𝐬: Python, PyTorch, Gym, Stable Baselines3, Pandas, Matplotlib, Weights & Biases, HDF5",
+          "linkedinSchoolName": "Universitatea Politehnica din Timişoara",
+          "linkedinSkillsLabel": "Artificial Intelligence (AI), MLOps, Software Development, Python, Machine Learning, Deep Learning, Generative AI, Large Language Models (LLM), Amazon Web Services (AWS), PyTorch, Computer Vision, Google Cloud Platform (GCP), Infrastructure as code (IaC), Scikit-Learn, Mentoring, Mathematics, Natural Language Processing (NLP), Data Science, Object Detection, Extract, Transform, Load (ETL)",
+          "location": "Timişoara, Timiş, Romania",
+          "previousCompanyName": "Decoding ML",
+          "connectionDegree": "2nd",
+          "refreshedAt": "2025-06-13T20:04:10.682Z",
+          "mutualConnectionsUrl": "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&facetConnectionOf=%5B%22ACoAACQFQWgBqowPZBqBQgSC3ATmuatVfZkf6fE%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH&RESULT_TYPE=PEOPLE",
+          "connectionsUrl": "https://www.linkedin.com/search/results/people/?facetConnectionOf=%5B%22ACoAACQFQWgBqowPZBqBQgSC3ATmuatVfZkf6fE%22%5D&facetNetwork=%5B%22F%22%2C%22S%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH",
+          "linkedinConnectionsCount": "500",
+          "profileUrl": "https://www.linkedin.com/in/pauliusztin/",
+          "linkedinCompanyName": "Stealth AI Startup",
+          "linkedinCompanyDescription": "We are a Stealth Startup focused on revolutionizing the landscape of Artificial General Intelligence. We are a team of visionaries, researchers, and engineers committed to pushing the boundaries of AI to create solutions that will transform industries and improve lives.\n\nWe have a Strong Founding Team, Backed by Stellar Investors and working towards creating the future and disrupting the status-quo using Technology & Innovation.",
+          "linkedinCompanyTagline": "Stealth Mode: AI's Next Big Thing in the Making.",
+          "linkedinCompanyFollowerCount": "71342",
+          "linkedinCompanyWebsite": "",
+          "linkedinCompanyEmployeesCount": "4079",
+          "linkedinCompanySize": "11-50 employees",
+          "linkedinCompanyHeadquarter": "US",
+          "linkedinCompanyIndustry": "Technology, Information and Internet",
+          "linkedinCompanyFounded": "",
+          "linkedinCompanySpecialities": "Artificial Intelligence, Machine Learning, Generative AI, Autonomous AI Agents",
+          "scraperProfileId": "95754451",
+          "scraperFullName": "Mutugi Nkonge ",
+          "linkedinPreviousSchoolDegree": "Bachelor's degree"
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Information Technology & Services",
+          "companyName": "Quantiphi",
+          "companyWebsite": "https://www.quantiphi.com",
+          "firstName": "Aditya",
+          "lastName": "H",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/quantiphi/",
+          "linkedinCompanySlug": "quantiphi",
+          "linkedinDescription": "Meet Aditya! He has been an autodidact for the most part in his life and he's willing to learn something new everyday. He has always been fascinated by the analytical geometry. In his childhood he used to wonder whether he can find an equation for life and predict things using an equation?\n\nI'm very happy that indeed I can find such equations using Machine Learning and Deeplearning\nI've worked with Multivariate Regression, logistic regression, classification, support vector machines, Naives algorithms, decision trees, principal component analysis, linear discriminant analysis, Deep Neural Networks, Convolutional neural networks, Autoencoders(compression), denoising autoencoders and VAE. I've a strong passion for machine learning, deep learning and building softwares. In software engineering, I love building Fullstack Websites and a budding Mobile app developer. My goal is to provide software solutions by integrating it with a lot of tech stacks that impacts the lives of billions of people around the world.\n\nLanguages:\nC, C++, Java, JavaScript, Python.\n\nML DL Frameworks :\nScikit learn, pandas, numpy, Keras, seaborn, Matplotlib, Tensorflow..\n\nFullstack:\nHTML, CSS, JavaScript, Nodejs.\n\nApp Development:\nAndroid Studio(Beginner)",
+          "linkedinFollowersCount": "4018",
+          "linkedinHeadline": "Machine Learning Engineer @ R&D - Quantiphi |\nGATE DA '24 Qualified | Check out DS ML & DSA series (Tamil) YT : Adi Explains | Leetcode (1000+ days consistent streak)",
+          "linkedinIsHiringBadge": "false",
+          "linkedinIsOpenToWorkBadge": "false",
+          "linkedinJobDateRange": "Sep 2024 - Present",
+          "linkedinJobDescription": "Key Machine Learning Engineer in DART (Digital Animal Replacement Technology). \nDART is focused on leveraging machine learning to replace animals in clinical testing, providing innovative solutions for more ethical and efficient research methods. DART eliminates the need for animal testing by using AI-driven simulations and in vitro platforms to predict safety concerns during R&D, clinical trials, and production phases.\n\nResponsibilities:\n- Primarily focused on computer vision.\n- Conduct experiments with various computer vision models and use various techniques like hyperparameter tuning for optimization & improve accuracy.\n- Manage annotations for data labeling and model training.\n- Explore cutting-edge models like MedSAM to stay updated with the latest trends.\n- Regularly read research papers to implement the latest innovations in machine learning.",
+          "linkedinJobLocation": "Bengaluru, Karnataka, India",
+          "linkedinJobTitle": "Machine Learning Engineer",
+          "linkedinPreviousCompanySlug": "youtube",
+          "linkedinPreviousJobDateRange": "Nov 2022 - Present",
+          "linkedinPreviousJobDescription": "Adi Explains is a dedicated YouTube channel focused on empowering Tamil-speaking learners with comprehensive education in programming, data structures and algorithms (DSA), Problem solving, machine learning, and more. As the founder, I develop and deliver high-quality, accessible content to help viewers build strong technical skills. Our mission is to foster consistent learning and mastery of complex subjects, ensuring our audience has the tools they need to succeed in the academics & tech industry.\n\nCheck out,\n- DS & ML playlist\n- DSA series (c++) \n- Python programming full course(8 hours)",
+          "linkedinPreviousJobLocation": "India",
+          "linkedinPreviousJobTitle": "Content Creator",
+          "linkedinPreviousSchoolUrl": "",
+          "linkedinPreviousSchoolCompanySlug": "",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "",
+          "linkedinProfileId": "331101548",
+          "linkedinProfileSlug": "aditya26",
+          "linkedinProfileUrl": "https://linkedin.com/in/aditya26",
+          "linkedinProfileUrn": "ACoAABO8NWwBNXmc42kWBDUDa6kPv9OfasqcwQA",
+          "linkedinSchoolUrl": "https://linkedin.com/school/shanmugha-arts-science-technology-&-reserch-academy-sastra-thanjavur",
+          "linkedinSchoolCompanySlug": "shanmugha-arts-science-technology-&-reserch-academy-sastra-thanjavur",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "Bachelor of Technology - BTech",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "Shanmugha Arts, Science, Technology & Reserch Academy (SASTRA), Thanjavur",
+          "linkedinSkillsLabel": "Cloud Computing, Google Cloud Platform (GCP), Cloud Storage, Online Content Creation, Teaching, experiment, Public Speaking, Web Development, Data structures, C++, Arduino, C (Programming Language), Arduino IDE, Deep Learning, Psychology, SQL, Android Studio, Natural Language Processing (NLP), Machine Learning",
+          "location": "Bengaluru, Karnataka, India",
+          "previousCompanyName": "YouTube",
+          "connectionDegree": "2nd",
+          "refreshedAt": "2025-06-13T20:04:13.397Z",
+          "mutualConnectionsUrl": "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&facetConnectionOf=%5B%22ACoAABO8NWwBNXmc42kWBDUDa6kPv9OfasqcwQA%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH&RESULT_TYPE=PEOPLE",
+          "connectionsUrl": "https://www.linkedin.com/search/results/people/?facetConnectionOf=%5B%22ACoAABO8NWwBNXmc42kWBDUDa6kPv9OfasqcwQA%22%5D&facetNetwork=%5B%22F%22%2C%22S%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH",
+          "linkedinConnectionsCount": "500",
+          "profileUrl": "https://www.linkedin.com/in/aditya26/",
+          "linkedinCompanyName": "Quantiphi",
+          "linkedinCompanyDescription": "Quantiphi is an award-winning AI-first digital engineering company driven by the desire to reimagine and realize transformational opportunities at the heart of the business. Since its inception in 2013, Quantiphi has solved the toughest and most complex business problems by combining deep industry experience, disciplined cloud, and data-engineering practices, and cutting-edge artificial intelligence research to achieve accelerated and quantifiable business results. Learn more at www.quantiphi.com.",
+          "linkedinCompanyTagline": "Pioneering AI-first solutions, solving complex business challenges through expertise, cloud, data engineering, and AI.",
+          "linkedinCompanyFollowerCount": "400130",
+          "linkedinCompanyWebsite": "https://www.quantiphi.com",
+          "linkedinCompanyEmployeesCount": "3801",
+          "linkedinCompanySize": "1001-5000 employees",
+          "linkedinCompanyHeadquarter": "33 Boston Post Road West, Suite 600 , Massachusetts 01752, US",
+          "linkedinCompanyIndustry": "IT Services and IT Consulting",
+          "linkedinCompanyFounded": "2013",
+          "linkedinCompanySpecialities": "Big Data, Decision Science, Predictive Analytics, Machine Learning, Consulting, AI, Data Analytics, Deep Learning, Generative AI, LLMs, AI Agent",
+          "scraperProfileId": "95754451",
+          "scraperFullName": "Mutugi Nkonge ",
+          "linkedinPreviousSchoolDegree": ""
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Computer Software",
+          "companyName": "Microsoft",
+          "companyWebsite": "https://news.microsoft.com/",
+          "firstName": "Nitya",
+          "lastName": "Narasimhan, PhD",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/microsoft/",
+          "linkedinCompanySlug": "microsoft",
+          "linkedinDescription": "I'm a PhD and polyglot with 25+ years of industry, startup, and academic experience in software and systems engineering. I am also a frequent public speaker and illustrator whose visual guides and sketchnotes have been used in technical documentation, marketing campaigns, conferences and curricula, to make complex concepts more accessible to broad audiences and visual learners.\n\nMy early career was research-driven with a focus on distributed systems, reliability engineering and ubiquitous computing. I co-authored 30+ publications and 10+ patents in areas like context-aware frameworks, mobile computing and multi-screen advertising. I managed research teams and led multi-disciplinary projects and oversaw signature university collaborations with faculty at University of Michigan, Georgia Tech, UIUC, UIC, Northwestern and CMU - in areas ranging from distributed file systems, virtualization tooling, pervasive computing, and context-aware systems.\n\nAs a remote worker, I discovered the power of local and virtual communities as a way of staying connected to the rapid pace of technology innovation and its impact on real-world economies. It led me to a passion for community building, consulting, and entrepreneurship. I have over a decade of experience building successful tech communities in the Greater New York area, helping skill thousands of developers by organizing meetups and developer conferences, and delivering online courses and workshops. \n\nI pivoted to consulting to support local businesses and startups, expanding my research roots with new software development and startup engineering roles and responsibilities. I helped early-stage startups define strategy, build prototypes and secure funding and worked with local engineering colleges (as adjunct faculty and industry advisor) to add mobile & cloud skills to their curricula. I also established community programs and workshops to help members of under-represented communities gain soft skills in public speaking, visual storytelling, and proposal writing.\n\nMy passion for education and community led to my current role in AI & Advocacy at Microsoft. I am \"developer 0\" for our products, providing early feedback to improve developer experience. I build and lead core efforts around content and sample creation that transform product awareness into productive adoption. I'm a visual storyteller whose illustrated guides have been featured in leadership posts, technical documentation and curriculum. And I'm a creative problem solver and innovator interested in reimagining education and productivity in the era of AI.",
+          "linkedinFollowersCount": "8699",
+          "linkedinHeadline": "AI · Engineer · Educator · Illustrator · Researcher",
+          "linkedinIsHiringBadge": "false",
+          "linkedinIsOpenToWorkBadge": "false",
+          "linkedinJobDateRange": "Nov 2023 - Present",
+          "linkedinJobDescription": "Working on content, code and tools to help our developer ecosystem build intelligent apps and experiences with AI on Azure.",
+          "linkedinJobLocation": "",
+          "linkedinJobTitle": "Senior Cloud Advocate (AI)",
+          "linkedinPreviousCompanySlug": "",
+          "linkedinPreviousJobDateRange": "",
+          "linkedinPreviousJobDescription": "BitNBot (was DigitalHV) offers technology consulting and training services for mobile, web and wearable software and systems development. A primary focus is on working with early-stage startups on all aspects of their initial prototype of MVP, from planning and design to system architecture, full-stack and mobile development, deployment and innovation. \n\nI bring over 20 years of hands-on system design and development experience and over a decade of intellectual property and business intelligence that can help both shape the current product and provide early stage startups the space they need to grow their vision.\n\nPast engagements have focused on real-time collaborative sports, civic technology apps, mobile enterprise, non-profits and education technology. Current projects are focused on local economic development, Internet-Of-Things, conversational commerce and education technology.",
+          "linkedinPreviousJobLocation": "Hudson Valley, NY",
+          "linkedinPreviousJobTitle": "Owner",
+          "linkedinPreviousSchoolUrl": "https://linkedin.com/school/ucsantabarbara",
+          "linkedinPreviousSchoolCompanySlug": "ucsantabarbara",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "UC Santa Barbara",
+          "linkedinProfileId": "565091",
+          "linkedinProfileSlug": "nityan",
+          "linkedinProfileUrl": "https://linkedin.com/in/nityan",
+          "linkedinProfileUrn": "ACoAAAAIn2MB5SO66v_U-uXsKq7mpEPaPzn9dq0",
+          "linkedinSchoolUrl": "https://linkedin.com/school/ucsantabarbara",
+          "linkedinSchoolCompanySlug": "ucsantabarbara",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "PhD",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "UC Santa Barbara",
+          "linkedinSkillsLabel": "Microsoft Azure, Generative AI, Visual Storytelling, Program Management, AI Software Development, Artificial Intelligence (AI), Prompt Engineering, Software Development, Android, Distributed Systems, MeteorJS, ReactJS, AngularJS, Mobile Applications, System Architecture, JavaScript, Mobile Devices, REST, Software Engineering, Embedded Linux",
+          "location": "United States",
+          "previousCompanyName": "BitNBot LLC",
+          "connectionDegree": "3rd",
+          "refreshedAt": "2025-06-13T20:04:16.978Z",
+          "mutualConnectionsUrl": "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&facetConnectionOf=%5B%22ACoAAAAIn2MB5SO66v_U-uXsKq7mpEPaPzn9dq0%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH&RESULT_TYPE=PEOPLE",
+          "connectionsUrl": "https://www.linkedin.com/search/results/people/?facetConnectionOf=%5B%22ACoAAAAIn2MB5SO66v_U-uXsKq7mpEPaPzn9dq0%22%5D&facetNetwork=%5B%22F%22%2C%22S%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH",
+          "linkedinConnectionsCount": "500",
+          "profileUrl": "https://www.linkedin.com/in/nityan/",
+          "linkedinCompanyName": "Microsoft",
+          "linkedinCompanyDescription": "Every company has a mission. What's ours? To empower every person and every organization to achieve more. We believe technology can and should be a force for good and that meaningful innovation contributes to a brighter world in the future and today. Our culture doesn’t just encourage curiosity; it embraces it. Each day we make progress together by showing up as our authentic selves. We show up with a learn-it-all mentality. We show up cheering on others, knowing their success doesn't diminish our own. We show up every day open to learning our own biases, changing our behavior, and inviting in differences. Because impact matters. \n\nMicrosoft operates in 190 countries and is made up of approximately 228,000 passionate employees worldwide.",
+          "linkedinCompanyTagline": "",
+          "linkedinCompanyFollowerCount": "25598708",
+          "linkedinCompanyWebsite": "https://news.microsoft.com/",
+          "linkedinCompanyEmployeesCount": "237412",
+          "linkedinCompanySize": "10001 employees",
+          "linkedinCompanyHeadquarter": "1 Microsoft Way, Washington 98052, US",
+          "linkedinCompanyIndustry": "Software Development",
+          "linkedinCompanyFounded": "",
+          "linkedinCompanySpecialities": "Business Software, Developer Tools, Home & Educational Software, Tablets, Search, Advertising, Servers, Windows Operating System, Windows Applications & Platforms, Smartphones, Cloud Computing, Quantum Computing, Future of Work, Productivity, AI, Artificial Intelligence, Machine Learning, Laptops, Mixed Reality, Virtual Reality, Gaming, Developers, IT Professional",
+          "scraperProfileId": "95754451",
+          "scraperFullName": "Mutugi Nkonge ",
+          "linkedinPreviousSchoolDegree": "Master's degree"
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Computer Software",
+          "companyName": "Bespoke Labs",
+          "companyWebsite": "https://bespokelabs.ai/",
+          "firstName": "Alex",
+          "lastName": "Dimakis",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/bespokelabsai/",
+          "linkedinCompanySlug": "bespokelabsai",
+          "linkedinDescription": "UC Berkeley Professor. Researcher in generative AI and Information Theory.\nCofounder of Bespoke Labs ",
+          "linkedinFollowersCount": "5727",
+          "linkedinHeadline": "Professor, University of California Berkeley. \nCo-Founder, Bespoke Labs: Data curation for post-training.",
+          "linkedinIsHiringBadge": "false",
+          "linkedinIsOpenToWorkBadge": "false",
+          "linkedinJobDateRange": "Aug 2024 - Present",
+          "linkedinJobDescription": "",
+          "linkedinJobLocation": "San Francisco Bay Area",
+          "linkedinJobTitle": "Co-Founder and Chief Scientist",
+          "linkedinPreviousCompanySlug": "theuniversityoftexasataustin-",
+          "linkedinPreviousJobDateRange": "Oct 2020 - Present",
+          "linkedinPreviousJobDescription": "Research on Machine learning and Artificial intelligence. Focus on imaging and inverse problems using deep learning.",
+          "linkedinPreviousJobLocation": "Austin, Texas Metropolitan Area",
+          "linkedinPreviousJobTitle": "Professor",
+          "linkedinPreviousSchoolUrl": "https://linkedin.com/school/national-technical-university-of-athens",
+          "linkedinPreviousSchoolCompanySlug": "national-technical-university-of-athens",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "National Technical University of Athens",
+          "linkedinProfileId": "72168071",
+          "linkedinProfileSlug": "alex-dimakis-b1b20320",
+          "linkedinProfileUrl": "https://linkedin.com/in/alex-dimakis-b1b20320",
+          "linkedinProfileUrn": "ACoAAARNMocB_ktNT1GvnGSDhjAX_ojOZERd0no",
+          "linkedinSchoolUrl": "https://linkedin.com/school/uc-berkeley",
+          "linkedinSchoolCompanySlug": "uc-berkeley",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "Phd",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "University of California, Berkeley",
+          "linkedinSkillsLabel": "Start-up Leadership, Start-up Ventures, Fundraising, Coding Theory, Information Theory, Machine Learning, Algorithms, LaTeX, Signal Processing, Matlab, Computer Science, Simulations, Image Processing, Artificial Intelligence, C, Statistics, Applied Mathematics, Pattern Recognition, Mathematical Modeling, Data Mining",
+          "location": "Santa Clara, California, United States",
+          "previousCompanyName": "The University of Texas at Austin",
+          "connectionDegree": "2nd",
+          "refreshedAt": "2025-06-13T20:04:19.607Z",
+          "mutualConnectionsUrl": "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&facetConnectionOf=%5B%22ACoAAARNMocB_ktNT1GvnGSDhjAX_ojOZERd0no%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH&RESULT_TYPE=PEOPLE",
+          "connectionsUrl": "https://www.linkedin.com/search/results/people/?facetConnectionOf=%5B%22ACoAAARNMocB_ktNT1GvnGSDhjAX_ojOZERd0no%22%5D&facetNetwork=%5B%22F%22%2C%22S%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH",
+          "linkedinConnectionsCount": "500",
+          "profileUrl": "https://www.linkedin.com/in/alex-dimakis-b1b20320/",
+          "linkedinCompanyName": "Bespoke Labs",
+          "linkedinCompanyDescription": "RL for Agents",
+          "linkedinCompanyTagline": "Bespoke Labs is a venture funded startup creating AI tools for data curation and post-training LLMs. (We are hiring!)",
+          "linkedinCompanyFollowerCount": "2492",
+          "linkedinCompanyWebsite": "https://bespokelabs.ai/",
+          "linkedinCompanyEmployeesCount": "13",
+          "linkedinCompanySize": "2-10 employees",
+          "linkedinCompanyHeadquarter": "800 W El Camino Real, California 94040, US",
+          "linkedinCompanyIndustry": "Software Development",
+          "linkedinCompanyFounded": "",
+          "linkedinCompanySpecialities": "",
+          "scraperProfileId": "95754451",
+          "scraperFullName": "Mutugi Nkonge ",
+          "linkedinPreviousSchoolDegree": "BS"
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Higher Education",
+          "companyName": "University of Notre Dame",
+          "companyWebsite": "http://nd.edu",
+          "firstName": "Gang",
+          "lastName": "Liu",
+          "linkedinCompanyUrl": "https://www.linkedin.com/school/university-of-notre-dame/",
+          "linkedinCompanySlug": "university-of-notre-dame",
+          "linkedinDescription": "I am a fourth-year Ph.D. student in computer science and engineering, at the University of Notre Dame. My research interests are graph machine learning and data mining, with a focus on the applications of polymer and molecule property predictions. I am always interested in the topics of interpretability, generalization, and robustness in machine learning.",
+          "linkedinFollowersCount": "1399",
+          "linkedinHeadline": "Ph.D. Student at University of Notre Dame",
+          "linkedinIsHiringBadge": "false",
+          "linkedinIsOpenToWorkBadge": "false",
+          "linkedinJobDateRange": "Sep 2021 - Present",
+          "linkedinJobDescription": "",
+          "linkedinJobLocation": "United States",
+          "linkedinJobTitle": "Research Assistant",
+          "linkedinPreviousCompanySlug": "ibm",
+          "linkedinPreviousJobDateRange": "Jun 2024 - Sep 2024",
+          "linkedinPreviousJobDescription": "Working on LLM for molecules.",
+          "linkedinPreviousJobLocation": "Boston, Massachusetts, United States",
+          "linkedinPreviousJobTitle": "Research Intern",
+          "linkedinPreviousSchoolUrl": "https://linkedin.com/school/southwest-university",
+          "linkedinPreviousSchoolCompanySlug": "southwest-university",
+          "linkedinPreviousSchoolDateRange": "Oct 2017 - Jul 2021",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "Southwest University",
+          "linkedinProfileId": "1029625879",
+          "linkedinProfileSlug": "gang-liu-3879a0248",
+          "linkedinProfileUrl": "https://linkedin.com/in/gang-liu-3879a0248",
+          "linkedinProfileUrn": "ACoAAD1e2BcBCQ67u1EmKs51BImSJErDxh0wHGk",
+          "linkedinSchoolUrl": "https://linkedin.com/school/university-of-notre-dame",
+          "linkedinSchoolCompanySlug": "university-of-notre-dame",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "Doctor of Philosophy - PhD",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "University of Notre Dame",
+          "linkedinSkillsLabel": "Artificial Intelligence (AI)",
+          "location": "Notre Dame, Indiana, United States",
+          "previousCompanyName": "IBM",
+          "connectionDegree": "3rd",
+          "refreshedAt": "2025-06-13T20:04:22.078Z",
+          "mutualConnectionsUrl": "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&facetConnectionOf=%5B%22ACoAAD1e2BcBCQ67u1EmKs51BImSJErDxh0wHGk%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH&RESULT_TYPE=PEOPLE",
+          "connectionsUrl": "https://www.linkedin.com/search/results/people/?facetConnectionOf=%5B%22ACoAAD1e2BcBCQ67u1EmKs51BImSJErDxh0wHGk%22%5D&facetNetwork=%5B%22F%22%2C%22S%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH",
+          "linkedinConnectionsCount": "500",
+          "profileUrl": "https://www.linkedin.com/in/gang-liu-3879a0248/",
+          "linkedinCompanyName": "University of Notre Dame",
+          "linkedinCompanyDescription": "The University of Notre Dame is the premiere Catholic research university in the United States.\n\nIt offers an outstanding undergraduate and graduate education guided by a Catholic mission.",
+          "linkedinCompanyTagline": "",
+          "linkedinCompanyFollowerCount": "217823",
+          "linkedinCompanyWebsite": "http://nd.edu",
+          "linkedinCompanyEmployeesCount": "12341",
+          "linkedinCompanySize": "5001-10000 employees",
+          "linkedinCompanyHeadquarter": "400 Main Building, in 46556, US",
+          "linkedinCompanyIndustry": "Higher Education",
+          "linkedinCompanyFounded": "",
+          "linkedinCompanySpecialities": "Higher Education, Graduate School, College of Business, Law School, College of Engineering, College of Arts and Letters, Architecture School, College of Science, MBA, Global Affairs, Undergraduate education",
+          "scraperProfileId": "95754451",
+          "scraperFullName": "Mutugi Nkonge ",
+          "linkedinPreviousSchoolDegree": "Bachelor of Engineering - BE"
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Financial Services",
+          "companyName": "Scalable Capital",
+          "companyWebsite": "http://www.scalable.capital",
+          "firstName": "Shirin",
+          "lastName": "Khosravi Jam",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/scalable-capital/",
+          "linkedinCompanySlug": "scalable-capital",
+          "linkedinDescription": "Hi there! I’m a data scientist who loves solving interesting problems. My journey into data science started with mathematics and some self-taught programming skills. I work on diverse projects: from optimizing marketing campaigns, forecasting lifetime value and developing recommendation systems, to building AI Agent systems.\n\nOver the years, I’ve been fortunate enough to work on building and deploying scalable machine learning models on AWS to help solve real business challenges.\n\nI have created a blog, where I share real-world insights into data science, machine learning, LLMs, and MLOps. Feel free to explore it here\n\nJAM with AI  \n🔗https://jamwithai.substack.com/",
+          "linkedinFollowersCount": "34231",
+          "linkedinHeadline": "Sr. Data Scientist (30k+)| FinTech | LLM | RecSys | MLOps | AWS",
+          "linkedinIsHiringBadge": "false",
+          "linkedinIsOpenToWorkBadge": "false",
+          "linkedinJobDateRange": "Nov 2024 - Present",
+          "linkedinJobDescription": "",
+          "linkedinJobLocation": "Berlin, Germany",
+          "linkedinJobTitle": "Senior Data Scientist",
+          "linkedinPreviousCompanySlug": "verivox-gmbh",
+          "linkedinPreviousJobDateRange": "Nov 2023 - Oct 2024",
+          "linkedinPreviousJobDescription": "- Implementing end-to-end machine learning projects, from conception to MLOps deployment using AWS components such as SageMaker Pipelines, AWS ECS, AWS CDK, and CI/CD with Jenkins.\n- Implementing and deploying advanced analytical models on AWS to optimize performance marketing campaigns by optimizing ad spend to achieve targeted business outcomes.\n- Developing a ML-based ranking algorithm to enhance product offerings for our customers.\n- Implementing a forecasting model to estimate future energy orders.\n- Deploying an in-house GenAI chatbot using AWS Bedrock service and Streamlit.\n- Constructing and optimizing ETL data pipelines using AWS ECS and State Machines.",
+          "linkedinPreviousJobLocation": "Berlin, Germany",
+          "linkedinPreviousJobTitle": "Senior Data Scientist",
+          "linkedinPreviousSchoolUrl": "https://linkedin.com/school/maharashtra-institute-of-technology",
+          "linkedinPreviousSchoolCompanySlug": "maharashtra-institute-of-technology",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "Maharashtra Institute of Technology",
+          "linkedinProfileId": "538934288",
+          "linkedinProfileSlug": "shirin-khosravi-jam",
+          "linkedinProfileUrl": "https://linkedin.com/in/shirin-khosravi-jam",
+          "linkedinProfileUrn": "ACoAACAffBABmg0i0TxuEnNvNKeuiy2-Kq7k_Ds",
+          "linkedinSchoolUrl": "https://linkedin.com/school/otto-von-guericke-university-magdeburg",
+          "linkedinSchoolCompanySlug": "otto-von-guericke-university-magdeburg",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "Master's degree",
+          "linkedinSchoolDescription": "During my master's degree in Data Science and Finance, I gained expertise in:\n\n- Extensive exploration of machine learning, including developing my own ML algorithms in Python.\n- Proficiency in econometrics and predictive analytics, utilizing tools like Stata and R for statistical analysis and model formation.\n- In-depth knowledge of business forecasting, specializing in time series analysis and dashboard creation using R.\n\nProjects:\n\n- Achieved a grade of 1.0 in the Computational Finance and Financial Management Seminar, presenting a Python-based portfolio management dashboard.\n- Earned a grade of 1.0 for the Fintech and Blockchain Scientific Project, creating a RoboAdvisor Flask Web Application with machine learning techniques.\n\nMaster Thesis:\n\n- Attained a grade of 1.0 for the master's thesis on \"Application of Reinforcement Learning to Option Pricing,\" designed a novel reinforcement learning approach using the OpenAI Gym and TensorFlow package.",
+          "linkedinSchoolName": "Otto-von-Guericke University Magdeburg",
+          "linkedinSkillsLabel": "AI Agents, Time Series Forecasting, MLOps, Amazon Web Services (AWS), SQL, PySpark, Statistics, R (Programming Language), SAP Products, Visual Basic for Applications (VBA), Python, R, Data Science, Python (Programming Language), Machine Learning, Data Analysis, Data Visualization, Tableau, Data Modeling, Data Analytics",
+          "location": "Berlin, Berlin, Germany",
+          "previousCompanyName": "Verivox GmbH",
+          "connectionDegree": "2nd",
+          "refreshedAt": "2025-06-13T20:04:24.680Z",
+          "mutualConnectionsUrl": "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&facetConnectionOf=%5B%22ACoAACAffBABmg0i0TxuEnNvNKeuiy2-Kq7k_Ds%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH&RESULT_TYPE=PEOPLE",
+          "connectionsUrl": "https://www.linkedin.com/search/results/people/?facetConnectionOf=%5B%22ACoAACAffBABmg0i0TxuEnNvNKeuiy2-Kq7k_Ds%22%5D&facetNetwork=%5B%22F%22%2C%22S%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH",
+          "linkedinConnectionsCount": "500",
+          "profileUrl": "https://www.linkedin.com/in/shirin-khosravi-jam/",
+          "linkedinCompanyName": "Scalable Capital",
+          "linkedinCompanyDescription": "Scalable Capital is a leading FinTech in Europe, bringing people and technology-based investment together. The company was founded in 2014 and has offices in Munich, Berlin and London.\n\nFor private individuals, Scalable Capital offers a broker with a trading flat rate and interest and a digital wealth management. In digital wealth management, the company creates and manages globally diversified ETF portfolios for its clients with sustainable investment strategies when desired. The broker enables private individuals to trade stocks, ETFs, crypto, funds and more with as little as €1 and to set up ETF and stock savings plans with as little as €1.\n \nAs a fast-growing FinTech, we are constantly looking for new employees and also welcome unsolicited applications: https://careers.scalable.capital/\n\nFor further information please visit our website: www.scalable.capital.\n\nScalable Capital refers to Scalable GmbH and the affiliated companies. If this online presence contains information regarding capital markets, financial instruments and/or other topics relevant for investments of assets, the exclusive purpose of this information is to give general guidance on the investment services provided by Scalable Capital Limited and Scalable Capital GmbH.\n\nOur Privacy Policy can be found here: www.scalable.capital/privacy-policy\n",
+          "linkedinCompanyTagline": "Scalable Capital is a leading FinTech in Europe, bringing people and technology-based investment together. ",
+          "linkedinCompanyFollowerCount": "74002",
+          "linkedinCompanyWebsite": "http://www.scalable.capital",
+          "linkedinCompanyEmployeesCount": "702",
+          "linkedinCompanySize": "501-1000 employees",
+          "linkedinCompanyHeadquarter": "Seitzstraße 8e, Bayern 80538, DE",
+          "linkedinCompanyIndustry": "Financial Services",
+          "linkedinCompanyFounded": "2014",
+          "linkedinCompanySpecialities": "Digital investment management",
+          "scraperProfileId": "95754451",
+          "scraperFullName": "Mutugi Nkonge ",
+          "linkedinPreviousSchoolDegree": "PGD in Information Technology"
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Computer Software",
+          "companyName": "Amazon",
+          "companyWebsite": "https://www.aboutamazon.com/",
+          "firstName": "Karan",
+          "lastName": "Khanuja",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/amazon/",
+          "linkedinCompanySlug": "amazon",
+          "linkedinDescription": "Hi all, I'm a full-stack data scientist who gets the entire data science journey—from gathering data to deploying solutions. I dive into data mining, analysis, machine learning, and data engineering, and I'm just as comfortable building APIs, managing data pipelines, and working with databases as I am designing user interfaces and deploying models. Beyond the tech, I value clear communication and collaboration across teams, always keeping an eye on how technical solutions drive real business results.\n\nCertifications: Nanodegree in Data Science by Udacity.com,  Certified Data Scientist by Codecademy.com \nTech Stack: Python, PySpark, SQL Server, Redshift, BigQuery, Tableau, Periscope, Amazon Web Services (S3, Kinesis, Glue, Athena, Redshift, Dynamodb, Data Pipeline, SageMaker), Azure Services, Google Cloud Platform, Google Cloud Storage, GCLI, ACLI\nData Science: Data Analysis, Data Visualization, Data Wrangling, ETL, API Development and Integration, Data Research, Data Profiling, Web Scrapping, Data Mapping, Data Transfer, Data Migration\nMachine Learning: Regression, Logistic Regression, Support Vector Machine, Decision Tree, Random Forest, Naïve Bayes, Gradient Boosting, Principle Component Analysis, K-means, Collaborative filtering, k-NN, ARIMA, SARIMA, Bagging, Boosting",
+          "linkedinFollowersCount": "3077",
+          "linkedinHeadline": "Data Science @ Amazon | Full-Stack Data Scientist | ML Practitioner | Python Developer",
+          "linkedinIsHiringBadge": "false",
+          "linkedinIsOpenToWorkBadge": "false",
+          "linkedinJobDateRange": "Aug 2024 - Present",
+          "linkedinJobDescription": "",
+          "linkedinJobLocation": "New York, United States",
+          "linkedinJobTitle": "Senior Data Scientist",
+          "linkedinPreviousCompanySlug": "hornblower-group",
+          "linkedinPreviousJobDateRange": "May 2023 - Aug 2024",
+          "linkedinPreviousJobDescription": "",
+          "linkedinPreviousJobLocation": "New York, United States",
+          "linkedinPreviousJobTitle": "Lead Data Scientist",
+          "linkedinPreviousSchoolUrl": "https://linkedin.com/school/st-aloysius-autonomous-college",
+          "linkedinPreviousSchoolCompanySlug": "st-aloysius-autonomous-college",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "St. Aloysius'​ (Autonomous) College",
+          "linkedinProfileId": "593034497",
+          "linkedinProfileSlug": "karan-khanuja-315733146",
+          "linkedinProfileUrl": "https://linkedin.com/in/karan-khanuja-315733146",
+          "linkedinProfileUrn": "ACoAACNY_QEBSnS5Dt03MrSuv6LacrBQinbN4gQ",
+          "linkedinSchoolUrl": "https://linkedin.com/school/california-state-university-fullerton",
+          "linkedinSchoolCompanySlug": "california-state-university-fullerton",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "Master's degree",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "California State University, Fullerton",
+          "linkedinSkillsLabel": "Machine Learning, Tableau Prep, Data Pipelines, Python (Programming Language), Forecasting, Data Analytics, Qualtrics, Surveys, Market Research, Python, SQL, Data Mining, Extract, Transform, Load (ETL), Data Visualization, Business Intelligence (BI), Operations Research, Data Analysis, Business Analysis, Market Analysis, Project Management",
+          "location": "New York, New York, United States",
+          "previousCompanyName": "Hornblower Group",
+          "connectionDegree": "2nd",
+          "refreshedAt": "2025-06-13T20:04:27.442Z",
+          "mutualConnectionsUrl": "https://www.linkedin.com/search/results/people/?facetNetwork=%5B%22F%22%5D&facetConnectionOf=%5B%22ACoAACNY_QEBSnS5Dt03MrSuv6LacrBQinbN4gQ%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH&RESULT_TYPE=PEOPLE",
+          "connectionsUrl": "https://www.linkedin.com/search/results/people/?facetConnectionOf=%5B%22ACoAACNY_QEBSnS5Dt03MrSuv6LacrBQinbN4gQ%22%5D&facetNetwork=%5B%22F%22%2C%22S%22%5D&origin=MEMBER_PROFILE_CANNED_SEARCH",
+          "linkedinConnectionsCount": "500",
+          "profileUrl": "https://www.linkedin.com/in/karan-khanuja-315733146/",
+          "linkedinCompanyName": "Amazon",
+          "linkedinCompanyDescription": "Amazon is guided by four principles: customer obsession rather than competitor focus, passion for invention, commitment to operational excellence, and long-term thinking. We are driven by the excitement of building technologies, inventing products, and providing services that change lives. We embrace new ways of doing things, make decisions quickly, and are not afraid to fail. We have the scope and capabilities of a large company, and the spirit and heart of a small one.\n\nTogether, Amazonians research and develop new technologies from Amazon Web Services to Alexa on behalf of our customers: shoppers, sellers, content creators, and developers around the world.\n\nOur mission is to be Earth's most customer-centric company. Our actions, goals, projects, programs, and inventions begin and end with the customer top of mind.\n\nYou'll also hear us say that at Amazon, it's always \"Day 1.\"​ What do we mean? That our approach remains the same as it was on Amazon's very first day - to make smart, fast decisions, stay nimble, invent, and focus on delighting our customers.",
+          "linkedinCompanyTagline": "",
+          "linkedinCompanyFollowerCount": "34374380",
+          "linkedinCompanyWebsite": "https://www.aboutamazon.com/",
+          "linkedinCompanyEmployeesCount": "731773",
+          "linkedinCompanySize": "10001 employees",
+          "linkedinCompanyHeadquarter": "2127 7th Ave., WA 98109, US",
+          "linkedinCompanyIndustry": "Software Development",
+          "linkedinCompanyFounded": "",
+          "linkedinCompanySpecialities": "e-Commerce, Retail, Operations, Internet",
+          "scraperProfileId": "95754451",
+          "scraperFullName": "Mutugi Nkonge ",
+          "linkedinPreviousSchoolDegree": "Bachelor of Commerce - BCom"
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "",
+          "companyName": "",
+          "companyWebsite": "",
+          "firstName": "",
+          "lastName": "",
+          "linkedinCompanyUrl": "",
+          "linkedinCompanySlug": "",
+          "linkedinDescription": "",
+          "linkedinFollowersCount": "",
+          "linkedinHeadline": "",
+          "linkedinIsHiringBadge": "",
+          "linkedinIsOpenToWorkBadge": "",
+          "linkedinJobDateRange": "",
+          "linkedinJobDescription": "",
+          "linkedinJobLocation": "",
+          "linkedinJobTitle": "",
+          "linkedinPreviousCompanySlug": "",
+          "linkedinPreviousJobDateRange": "",
+          "linkedinPreviousJobDescription": "",
+          "linkedinPreviousJobLocation": "",
+          "linkedinPreviousJobTitle": "",
+          "linkedinPreviousSchoolUrl": "",
+          "linkedinPreviousSchoolCompanySlug": "",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "",
+          "linkedinProfileId": "",
+          "linkedinProfileSlug": "",
+          "linkedinProfileUrl": "",
+          "linkedinProfileUrn": "",
+          "linkedinSchoolUrl": "",
+          "linkedinSchoolCompanySlug": "",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "",
+          "linkedinSkillsLabel": "",
+          "location": "",
+          "previousCompanyName": "",
+          "connectionDegree": "",
+          "refreshedAt": "",
+          "mutualConnectionsUrl": "",
+          "connectionsUrl": "",
+          "linkedinConnectionsCount": "",
+          "profileUrl": "",
+          "linkedinCompanyName": "",
+          "linkedinCompanyDescription": "",
+          "linkedinCompanyTagline": "",
+          "linkedinCompanyFollowerCount": "",
+          "linkedinCompanyWebsite": "",
+          "linkedinCompanyEmployeesCount": "",
+          "linkedinCompanySize": "",
+          "linkedinCompanyHeadquarter": "",
+          "linkedinCompanyIndustry": "",
+          "linkedinCompanyFounded": "",
+          "linkedinCompanySpecialities": "",
+          "scraperProfileId": "",
+          "scraperFullName": "",
+          "linkedinPreviousSchoolDegree": ""
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "",
+          "companyName": "",
+          "companyWebsite": "",
+          "firstName": "",
+          "lastName": "",
+          "linkedinCompanyUrl": "",
+          "linkedinCompanySlug": "",
+          "linkedinDescription": "",
+          "linkedinFollowersCount": "",
+          "linkedinHeadline": "",
+          "linkedinIsHiringBadge": "",
+          "linkedinIsOpenToWorkBadge": "",
+          "linkedinJobDateRange": "",
+          "linkedinJobDescription": "",
+          "linkedinJobLocation": "",
+          "linkedinJobTitle": "",
+          "linkedinPreviousCompanySlug": "",
+          "linkedinPreviousJobDateRange": "",
+          "linkedinPreviousJobDescription": "",
+          "linkedinPreviousJobLocation": "",
+          "linkedinPreviousJobTitle": "",
+          "linkedinPreviousSchoolUrl": "",
+          "linkedinPreviousSchoolCompanySlug": "",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "",
+          "linkedinProfileId": "",
+          "linkedinProfileSlug": "",
+          "linkedinProfileUrl": "",
+          "linkedinProfileUrn": "",
+          "linkedinSchoolUrl": "",
+          "linkedinSchoolCompanySlug": "",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "",
+          "linkedinSkillsLabel": "",
+          "location": "",
+          "previousCompanyName": "",
+          "connectionDegree": "",
+          "refreshedAt": "",
+          "mutualConnectionsUrl": "",
+          "connectionsUrl": "",
+          "linkedinConnectionsCount": "",
+          "profileUrl": "",
+          "linkedinCompanyName": "",
+          "linkedinCompanyDescription": "",
+          "linkedinCompanyTagline": "",
+          "linkedinCompanyFollowerCount": "",
+          "linkedinCompanyWebsite": "",
+          "linkedinCompanyEmployeesCount": "",
+          "linkedinCompanySize": "",
+          "linkedinCompanyHeadquarter": "",
+          "linkedinCompanyIndustry": "",
+          "linkedinCompanyFounded": "",
+          "linkedinCompanySpecialities": "",
+          "scraperProfileId": "",
+          "scraperFullName": "",
+          "linkedinPreviousSchoolDegree": ""
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Export limit reached - Get more with our premium plans",
+          "companyName": "",
+          "companyWebsite": "",
+          "firstName": "",
+          "lastName": "",
+          "linkedinCompanyUrl": "",
+          "linkedinCompanySlug": "",
+          "linkedinDescription": "",
+          "linkedinFollowersCount": "",
+          "linkedinHeadline": "",
+          "linkedinIsHiringBadge": "",
+          "linkedinIsOpenToWorkBadge": "",
+          "linkedinJobDateRange": "",
+          "linkedinJobDescription": "",
+          "linkedinJobLocation": "",
+          "linkedinJobTitle": "",
+          "linkedinPreviousCompanySlug": "",
+          "linkedinPreviousJobDateRange": "",
+          "linkedinPreviousJobDescription": "",
+          "linkedinPreviousJobLocation": "",
+          "linkedinPreviousJobTitle": "",
+          "linkedinPreviousSchoolUrl": "",
+          "linkedinPreviousSchoolCompanySlug": "",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "",
+          "linkedinProfileId": "",
+          "linkedinProfileSlug": "",
+          "linkedinProfileUrl": "",
+          "linkedinProfileUrn": "",
+          "linkedinSchoolUrl": "",
+          "linkedinSchoolCompanySlug": "",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "",
+          "linkedinSkillsLabel": "",
+          "location": "",
+          "previousCompanyName": "",
+          "connectionDegree": "",
+          "refreshedAt": "",
+          "mutualConnectionsUrl": "",
+          "connectionsUrl": "",
+          "linkedinConnectionsCount": "",
+          "profileUrl": "",
+          "linkedinCompanyName": "",
+          "linkedinCompanyDescription": "",
+          "linkedinCompanyTagline": "",
+          "linkedinCompanyFollowerCount": "",
+          "linkedinCompanyWebsite": "",
+          "linkedinCompanyEmployeesCount": "",
+          "linkedinCompanySize": "",
+          "linkedinCompanyHeadquarter": "",
+          "linkedinCompanyIndustry": "",
+          "linkedinCompanyFounded": "",
+          "linkedinCompanySpecialities": "",
+          "scraperProfileId": "",
+          "scraperFullName": "",
+          "linkedinPreviousSchoolDegree": ""
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "Upgrade to export all your data with the link below:",
+          "companyName": "",
+          "companyWebsite": "",
+          "firstName": "",
+          "lastName": "",
+          "linkedinCompanyUrl": "",
+          "linkedinCompanySlug": "",
+          "linkedinDescription": "",
+          "linkedinFollowersCount": "",
+          "linkedinHeadline": "",
+          "linkedinIsHiringBadge": "",
+          "linkedinIsOpenToWorkBadge": "",
+          "linkedinJobDateRange": "",
+          "linkedinJobDescription": "",
+          "linkedinJobLocation": "",
+          "linkedinJobTitle": "",
+          "linkedinPreviousCompanySlug": "",
+          "linkedinPreviousJobDateRange": "",
+          "linkedinPreviousJobDescription": "",
+          "linkedinPreviousJobLocation": "",
+          "linkedinPreviousJobTitle": "",
+          "linkedinPreviousSchoolUrl": "",
+          "linkedinPreviousSchoolCompanySlug": "",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "",
+          "linkedinProfileId": "",
+          "linkedinProfileSlug": "",
+          "linkedinProfileUrl": "",
+          "linkedinProfileUrn": "",
+          "linkedinSchoolUrl": "",
+          "linkedinSchoolCompanySlug": "",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "",
+          "linkedinSkillsLabel": "",
+          "location": "",
+          "previousCompanyName": "",
+          "connectionDegree": "",
+          "refreshedAt": "",
+          "mutualConnectionsUrl": "",
+          "connectionsUrl": "",
+          "linkedinConnectionsCount": "",
+          "profileUrl": "",
+          "linkedinCompanyName": "",
+          "linkedinCompanyDescription": "",
+          "linkedinCompanyTagline": "",
+          "linkedinCompanyFollowerCount": "",
+          "linkedinCompanyWebsite": "",
+          "linkedinCompanyEmployeesCount": "",
+          "linkedinCompanySize": "",
+          "linkedinCompanyHeadquarter": "",
+          "linkedinCompanyIndustry": "",
+          "linkedinCompanyFounded": "",
+          "linkedinCompanySpecialities": "",
+          "scraperProfileId": "",
+          "scraperFullName": "",
+          "linkedinPreviousSchoolDegree": ""
+        }
+      },
+      {
+        "json": {
+          "companyIndustry": "https://phbuster.io/upgrade",
+          "companyName": "",
+          "companyWebsite": "",
+          "firstName": "",
+          "lastName": "",
+          "linkedinCompanyUrl": "",
+          "linkedinCompanySlug": "",
+          "linkedinDescription": "",
+          "linkedinFollowersCount": "",
+          "linkedinHeadline": "",
+          "linkedinIsHiringBadge": "",
+          "linkedinIsOpenToWorkBadge": "",
+          "linkedinJobDateRange": "",
+          "linkedinJobDescription": "",
+          "linkedinJobLocation": "",
+          "linkedinJobTitle": "",
+          "linkedinPreviousCompanySlug": "",
+          "linkedinPreviousJobDateRange": "",
+          "linkedinPreviousJobDescription": "",
+          "linkedinPreviousJobLocation": "",
+          "linkedinPreviousJobTitle": "",
+          "linkedinPreviousSchoolUrl": "",
+          "linkedinPreviousSchoolCompanySlug": "",
+          "linkedinPreviousSchoolDateRange": "",
+          "linkedinPreviousSchoolDescription": "",
+          "linkedinPreviousSchoolName": "",
+          "linkedinProfileId": "",
+          "linkedinProfileSlug": "",
+          "linkedinProfileUrl": "",
+          "linkedinProfileUrn": "",
+          "linkedinSchoolUrl": "",
+          "linkedinSchoolCompanySlug": "",
+          "linkedinSchoolDateRange": "",
+          "linkedinSchoolDegree": "",
+          "linkedinSchoolDescription": "",
+          "linkedinSchoolName": "",
+          "linkedinSkillsLabel": "",
+          "location": "",
+          "previousCompanyName": "",
+          "connectionDegree": "",
+          "refreshedAt": "",
+          "mutualConnectionsUrl": "",
+          "connectionsUrl": "",
+          "linkedinConnectionsCount": "",
+          "profileUrl": "",
+          "linkedinCompanyName": "",
+          "linkedinCompanyDescription": "",
+          "linkedinCompanyTagline": "",
+          "linkedinCompanyFollowerCount": "",
+          "linkedinCompanyWebsite": "",
+          "linkedinCompanyEmployeesCount": "",
+          "linkedinCompanySize": "",
+          "linkedinCompanyHeadquarter": "",
+          "linkedinCompanyIndustry": "",
+          "linkedinCompanyFounded": "",
+          "linkedinCompanySpecialities": "",
+          "scraperProfileId": "",
+          "scraperFullName": "",
+          "linkedinPreviousSchoolDegree": ""
+        }
+      }
+    ],
+    "companyLevel": [
+      {
+        "json": {
+          "profileUrl": "https://www.linkedin.com/in/hpsc24/",
+          "companyName": "Pursuing",
+          "companyIndustry": "Law Practice",
+          "companyWebsite": "https://www.pursuing.com",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/pursuing/",
+          "linkedinCompanySlug": "pursuing",
+          "linkedinCompanyDescription": "Engineers focused on equality, environmentalism, progress as a culture, and civilization.  The organization is owned by Hart - connect via LinkedIn for any relationships regarding marketing, sales, or growth. \n\n\n\nhttps://www.linkedin.com/mwlite/in/hart-pearson-sebastian-cunningham-a53a15241",
+          "linkedinCompanyTagline": "To chase, follow or take legal action against someone or something, to catch them, attack them, or get a legal remedy,",
+          "linkedinCompanyFollowerCount": "120",
+          "linkedinCompanyWebsite": "https://www.pursuing.com",
+          "linkedinCompanyEmployeesCount": "79",
+          "linkedinCompanySize": "2-10 employees",
+          "linkedinCompanyHeadquarter": "California, US",
+          "linkedinCompanyIndustry": "Legal Services",
+          "linkedinCompanyFounded": "2022",
+          "linkedinCompanySpecialities": "Legal Services, Lawyers Directory, Leagal Guides, Law Schools Directory, Legal Advice, Legal Q & A, Lawyer Marketing Services"
+        }
+      },
+      {
+        "json": {
+          "profileUrl": "https://www.linkedin.com/in/svanweelden/",
+          "companyName": "Mercor",
+          "companyIndustry": "Computer Software",
+          "companyWebsite": "mercor.com/?utm_source=linkedin&utm_medium=bio",
+          "linkedinCompanyUrl": "https://www.linkedin.com/company/mercor-ai/",
+          "linkedinCompanySlug": "mercor-ai",
+          "linkedinCompanyDescription": "We use AI to understand human ability and match talent with the opportunities they're best suited for.",
+          "linkedinCompanyTagline": "We use AI to understand human ability and match talent with the opportunities they're best suited for.",
+          "linkedinCompanyFollowerCount": "300622",
+          "linkedinCompanyWebsite": "mercor.com/?utm_source=linkedin&utm_medium=bio",
+          "linkedinCompanyEmployeesCount": "585",
+          "linkedinCompanySize": "51-200 employees",
+          "linkedinCompanyHeadquarter": "California 94105, US",
+          "linkedinCompanyIndustry": "Software Development",
+          "linkedinCompanyFounded": "2023",
+          "linkedinCompanySpecialities": ""
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "launchPhantombuster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "launchPhantombuster": {
+      "main": [
+        [
+          {
+            "node": "outputPhantombuster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "outputPhantombuster": {
+      "main": [
+        [
+          {
+            "node": "contactEnrichment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "contactLevel": {
+      "main": [
+        [
+          {
+            "node": "contactLevelAgent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "contactLevelAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "companyLevel": {
+      "main": [
+        [
+          {
+            "node": "companyAgent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "companyAgent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filterMatches": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "contactEnrichment": {
+      "main": [
+        [
+          {
+            "node": "contactLevel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "companyLevel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "filterMatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "companyAgent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "summariserFilter": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "contactLevelAgent": {
+      "main": [
+        [
+          {
+            "node": "summariserFilter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "contactLevelAgent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "companyAgent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "email_added?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "email_added?": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2bff3b78-771d-4520-a963-0db40b7b12a9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7398abaadcdb15910adadf066dc0f112c971e339160f0f9d012e98bb1a878955"
+  },
+  "id": "OZiw3TpkqnNnSSST",
+  "tags": []
+}
