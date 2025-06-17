@@ -1,1 +1,1 @@
-A collecttion of many n8n workflows
+A collection of many n8n workflows
