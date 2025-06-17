@@ -44,7 +44,7 @@ The workflow splits into multiple branches to process data concurrently:
 
 5.  **Merge**: The results from the parallel contact and company enrichment branches are combined into a single dataset.
 6.  **Final Output**: The final, merged, and enriched data is appended to a master Google Sheet (`Google Sheets3`), creating a comprehensive and clean contact list.
-
+7. Sample link here - https://docs.google.com/spreadsheets/d/1rVJ5HADiC0OembrsvKyfvbck7kVCWIATf37Fb7o_dLI/edit?gid=0#gid=0
 ## Setup & Prerequisites
 
 To run this workflow, you will need:
